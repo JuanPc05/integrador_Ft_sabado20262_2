@@ -116,3 +116,5 @@ export const FeedbackDrawer = () => {
     </div>
   );
 };
+
+export default FeedbackDrawer;

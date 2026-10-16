@@ -28,3 +28,5 @@ export const SupportBanner = () => {
     </div>
   );
 };
+
+export default SupportBanner;

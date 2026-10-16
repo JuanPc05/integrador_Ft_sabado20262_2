@@ -24,7 +24,7 @@ const SOCIALS = [
   { label: 'Soporte y Preguntas', icon: 'help_center' },
 ];
 
-function Footer() {
+export function Footer() {
   return (
     <footer className="bg-surface-container-lowest border-t border-surface-variant/30 w-full mt-auto">
       <div className="w-full py-12 px-6 md:px-12 max-w-7xl mx-auto flex flex-col gap-10">

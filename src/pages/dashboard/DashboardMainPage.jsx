@@ -61,3 +61,6 @@ export const DashboardMainPage = () => {
     </>
   );
 };
+
+export { DashboardMainPage as DashboardPage };
+export default DashboardMainPage;

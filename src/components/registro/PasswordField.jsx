@@ -34,4 +34,5 @@ function PasswordField({ value, onChange }) {
   );
 }
 
+export { PasswordField };
 export default PasswordField;

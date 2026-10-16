@@ -227,3 +227,5 @@ export const ChallengeTable = () => {
     </div>
   );
 };
+
+export default ChallengeTable;

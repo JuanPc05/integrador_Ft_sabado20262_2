@@ -20,3 +20,5 @@ export const NextSessionCard = () => {
     </div>
   );
 };
+
+export default NextSessionCard;

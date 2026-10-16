@@ -7,14 +7,16 @@ function InputField({ id, label, icon, type = 'text', rightSlot, children, ...pr
         {label}
       </label>
       <div className="relative flex items-center">
-        <span className="absolute left-4 text-outline pointer-events-none flex items-center">
-          <Icon name={icon} className="text-[20px]" />
-        </span>
+        {icon && (
+          <span className="absolute left-4 text-outline pointer-events-none flex items-center">
+            <Icon name={icon} className="text-[20px]" />
+          </span>
+        )}
         <input
           id={id}
           name={id}
           type={type}
-          className={`w-full pl-11 ${rightSlot ? 'pr-11' : 'pr-4'} py-3 bg-[#12141C] border border-white/10 rounded-xl text-body-md font-body-md text-on-surface placeholder:text-outline/70 focus:border-primary-container focus:ring-2 focus:ring-primary-container/25 transition-all outline-none`}
+          className={`w-full ${icon ? 'pl-11' : 'pl-4'} ${rightSlot ? 'pr-11' : 'pr-4'} py-3 bg-[#12141C] border border-white/10 rounded-xl text-body-md font-body-md text-on-surface placeholder:text-outline/70 focus:border-primary-container focus:ring-2 focus:ring-primary-container/25 transition-all outline-none`}
           {...props}
         />
         {rightSlot}
@@ -24,4 +26,5 @@ function InputField({ id, label, icon, type = 'text', rightSlot, children, ...pr
   );
 }
 
+export { InputField };
 export default InputField;

@@ -45,4 +45,5 @@ function Register() {
   );
 }
 
+export { Register, Register as RegisterPage };
 export default Register;

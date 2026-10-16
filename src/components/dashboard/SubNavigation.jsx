@@ -50,3 +50,5 @@ export const SubNavigation = () => {
     </div>
   );
 };
+
+export default SubNavigation;

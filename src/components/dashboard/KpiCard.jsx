@@ -1,15 +1,15 @@
 // src/components/dashboard/KpiCard.jsx
 
 export const KpiCard = ({ 
-  title, 
-  icon, 
-  value, 
-  trendIcon, 
-  trendText, 
-  subtitle, 
-  colorClass, 
-  bgClass,
-  hoverClass 
+  title = '', 
+  icon = '', 
+  value = '', 
+  trendIcon = '', 
+  trendText = '', 
+  subtitle = '', 
+  colorClass = '', 
+  bgClass = '',
+  hoverClass = '' 
 }) => {
   return (
     <div className={`bg-surface-container-low p-5 rounded-2xl border border-white/5 shadow-md flex flex-col justify-between transition-all duration-200 ${hoverClass}`}>
@@ -47,3 +47,5 @@ export const KpiCard = ({
     </div>
   );
 };
+
+export default KpiCard;

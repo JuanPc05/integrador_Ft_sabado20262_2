@@ -19,7 +19,7 @@ function getScore(value) {
 
 function PasswordStrength({ value }) {
   const score = getScore(value);
-  const level = LEVELS[score];
+  const level = LEVELS[score] || LEVELS[0];
 
   return (
     <div className="pt-1.5">
@@ -41,4 +41,5 @@ function PasswordStrength({ value }) {
   );
 }
 
+export { PasswordStrength };
 export default PasswordStrength;

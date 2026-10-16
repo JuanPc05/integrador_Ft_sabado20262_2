@@ -1,0 +1,6 @@
+feat(frontend): configurar enrutamiento principal, layouts y vistas base
+
+- App: Limpieza de boilerplate de Vite y configuración de RouterProvider con rutas públicas (/, /landing), auth (/login, /registro) y privadas (/dashboard).
+- Layouts y Páginas: Creación de LandingPage (estética CESDE Conecta), LoginPage y AuthLayout. Integración de <Outlet /> en PublicLayout y DashboardLayout.
+- Navegación: Implementación de <Link> de react-router-dom en Navbar y formularios para navegación SPA. Creación de re-exports de compatibilidad.
+- Componentes UI: Programación defensiva con valores por defecto y renderizado condicional en SelectField, InputField, PasswordStrength y KpiCard.

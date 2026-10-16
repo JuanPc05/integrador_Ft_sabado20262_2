@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button, Icon } from '@/components/common';
 import InputField from './InputField';
 import PasswordField from './PasswordField';
@@ -78,16 +79,17 @@ function RegisterForm({ onSubmit }) {
       <div className="text-center pt-2">
         <p className="text-body-sm font-body-sm text-on-surface-variant">
           ¿Ya tienes cuenta?
-          <a
+          <Link
             className="text-primary font-semibold hover:underline hover:text-white transition-colors ml-1"
-            href="/login"
+            to="/login"
           >
             Inicia sesión
-          </a>
+          </Link>
         </p>
       </div>
     </form>
   );
 }
 
+export { RegisterForm };
 export default RegisterForm;
