@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * Componente Icon global utilizando Google Material Symbols.
  * @param {string} name - Nombre exacto del icono (ej. 'search', 'add', 'arrow_forward').

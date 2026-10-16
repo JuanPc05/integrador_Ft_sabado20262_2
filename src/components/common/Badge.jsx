@@ -1,4 +1,3 @@
-import React from 'react';
 import { Icon } from './Icon'; // Importamos el icono que ya creamos
 
 /**

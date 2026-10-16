@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * Componente Button global.
  * @param {string} variant - 'primary' (degradado), 'solid' (color plano), 'outline' (bordes), 'ghost' (transparente)
