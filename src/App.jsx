@@ -11,6 +11,8 @@ import { LandingPage } from '@/pages/landing/LandingPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { RegisterPage } from '@/pages/auth/RegisterPage';
 import { DashboardPage } from '@/pages/dashboard/DashboardPage';
+import { CrearEmpresaPage } from '@/pages/empresas/CrearEmpresaPage';
+import { EmpresaDetallePage } from '@/pages/empresas/EmpresaDetallePage';
 
 // 3. Cascarón del Guardián de Rutas (ProtectedRoute)
 const ProtectedRoute = ({ children }) => {
@@ -60,7 +62,9 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <DashboardPage /> }
+      { index: true, element: <DashboardPage /> },
+      { path: "empresas/nueva", element: <CrearEmpresaPage /> },
+      { path: "empresas/:id", element: <EmpresaDetallePage /> }
     ]
   },
 
@@ -68,7 +72,7 @@ const router = createBrowserRouter([
   {
     path: "*",
     element: <Navigate to="/" replace />
-  }
+  } 
 ]);
 
 // 5. Componente Raíz
