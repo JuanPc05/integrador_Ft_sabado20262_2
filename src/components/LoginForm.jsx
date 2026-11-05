@@ -14,16 +14,22 @@ export function LoginForm({ onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('1. Submit interceptado');
+
     setErrorMessage(null);
 
     try {
+      console.log('2. Llamando al contexto con:', email);
       const response = await loginContext({ email: email.trim(), password });
+      console.log('3. Autenticación exitosa, respuesta:', response);
+
       if (onSuccess) {
         onSuccess(response);
       } else {
         navigate('/dashboard', { replace: true });
       }
     } catch (error) {
+      console.log('Error en catch:', error);
       setErrorMessage(
         error?.message || 'Credenciales inválidas o error de conexión con el servidor.'
       );
@@ -113,7 +119,7 @@ export function LoginForm({ onSuccess }) {
       <div className="pt-2">
         <button
           type="submit"
-          disabled={loading || !email || !password}
+          disabled={loading}
           className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary-container px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary-container/25 hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-primary-container/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
         >
           <span>{loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}</span>
@@ -124,4 +130,3 @@ export function LoginForm({ onSuccess }) {
 }
 
 export default LoginForm;
-

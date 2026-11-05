@@ -1,38 +1,11 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Badge, Button, Icon } from '@/components/common';
-import InputField from '@/components/registro/InputField';
+// src/pages/auth/LoginPage.jsx
+import { Link } from 'react-router-dom';
+import { Badge } from '@/components/common';
+import { LoginForm } from '@/components/LoginForm';
 import Navbar from '@/layouts/Navbar';
 import Footer from '@/layouts/Footer';
 
 export function LoginPage() {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    rememberMe: false,
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    // Simular autenticación exitosa y redirigir al Dashboard
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate('/dashboard');
-    }, 500);
-  };
-
   return (
     <div className="bg-background text-on-surface antialiased selection:bg-primary-container selection:text-white min-h-screen flex flex-col justify-between relative overflow-x-hidden">
       {/* Brillos de fondo ambientales */}
@@ -59,79 +32,20 @@ export function LoginPage() {
               </p>
             </div>
 
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              <InputField
-                id="email"
-                label="Correo electrónico"
-                icon="mail"
-                type="email"
-                placeholder="correo@empresa.com o @cesde.edu.co"
-                required
-                value={formData.email}
-                onChange={handleChange}
-              />
+            {/* Formulario único conectado a AuthContext (sin <form> anidado) */}
+            <LoginForm />
 
-              <InputField
-                id="password"
-                label="Contraseña"
-                icon="lock"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Tu contraseña registrada"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                rightSlot={
-                  <button
-                    type="button"
-                    aria-label="Alternar visibilidad"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3.5 text-outline hover:text-on-surface transition-colors p-1"
-                  >
-                    <Icon name={showPassword ? 'visibility_off' : 'visibility'} className="text-[20px]" />
-                  </button>
-                }
-              />
-
-              <div className="flex items-center justify-between text-caption font-caption">
-                <label className="flex items-center gap-2 cursor-pointer text-on-surface-variant hover:text-on-surface">
-                  <input
-                    type="checkbox"
-                    name="rememberMe"
-                    checked={formData.rememberMe}
-                    onChange={handleChange}
-                    className="w-4 h-4 rounded bg-[#12141C] border border-white/20 text-primary-container focus:ring-primary-container"
-                  />
-                  <span>Recordarme en este equipo</span>
-                </label>
-                <a href="#" className="text-primary hover:underline hover:text-white transition-colors">
-                  ¿Olvidaste tu contraseña?
-                </a>
-              </div>
-
-              <div className="pt-2">
-                <Button
-                  type="submit"
-                  variant="primary"
-                  className="w-full"
-                  disabled={isLoading}
-                  iconRight={<Icon name="login" />}
+            <div className="text-center pt-6">
+              <p className="text-body-sm font-body-sm text-on-surface-variant">
+                ¿No tienes una cuenta aún?
+                <Link
+                  className="text-primary font-semibold hover:underline hover:text-white transition-colors ml-1"
+                  to="/registro"
                 >
-                  {isLoading ? 'Accediendo...' : 'Ingresar a la Plataforma'}
-                </Button>
-              </div>
-
-              <div className="text-center pt-2">
-                <p className="text-body-sm font-body-sm text-on-surface-variant">
-                  ¿No tienes una cuenta aún?
-                  <Link
-                    className="text-primary font-semibold hover:underline hover:text-white transition-colors ml-1"
-                    to="/registro"
-                  >
-                    Crea tu cuenta
-                  </Link>
-                </p>
-              </div>
-            </form>
+                  Crea tu cuenta
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </main>
