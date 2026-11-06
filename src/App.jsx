@@ -1,5 +1,7 @@
 // src/App.jsx
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
+import { AuthProvider } from '@/features/auth/AuthContext';
+import { router } from '@/app/AppRouter';
 
 // 1. Importación de Layouts (Los "Moldes")
 import { PublicLayout } from '@/layouts/PublicLayout';
@@ -77,7 +79,11 @@ const router = createBrowserRouter([
 
 // 5. Componente Raíz
 export function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }
 
 export default App;
