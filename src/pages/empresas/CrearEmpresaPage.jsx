@@ -1,10 +1,33 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/common';
 import EmpresaForm from '@/components/empresa/EmpresaForm';
+import { crearEmpresa } from '@/services/empresaService';
 
 export function CrearEmpresaPage() {
-  const handleSave = (values) => {
-    // TODO: conectar con la API para guardar la empresa
-    console.log('Empresa:', values);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSave = async (values) => {
+    setLoading(true);
+    setError('');
+    try {
+      // Los nombres de la izquierda son los que espera el backend (EmpresaRequestDTO)
+      const creada = await crearEmpresa({
+        nit: values.nit,
+        nombre: values.companyName,
+        sector: values.economicSector,
+        contactoNombre: values.contactName || null,
+        correo: values.contactEmail || null,
+        telefono: values.contactPhone || null,
+      });
+      navigate(`/dashboard/empresas/${creada.id}`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -21,7 +44,7 @@ export function CrearEmpresaPage() {
         </p>
       </div>
 
-      <EmpresaForm onSubmit={handleSave} />
+      <EmpresaForm onSubmit={handleSave} loading={loading} error={error} />
     </div>
   );
 }

@@ -1,24 +1,10 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { Badge, Button, Icon } from '@/components/common';
 import InfoCard from '@/components/empresa/InfoCard';
 import ContactCard from '@/components/empresa/ContactCard';
-
-// Datos de ejemplo. TODO: reemplazar por los datos que lleguen de la API (ruta /dashboard/empresas/:id).
-const EMPRESA = {
-  idRegistro: 'EMP-2025-0489',
-  nombre: 'NovaLogistics S.A.S.',
-  miembroDesde: 'Febrero, 2024',
-  nit: '900.123.456-7',
-  sector: 'Tecnología y Software',
-  etiquetaSector: 'B2B SaaS',
-  contacto: {
-    nombre: 'Carlos Arango',
-    cargo: 'Director de Innovación',
-    correo: 'contacto@novalogistics.com',
-    telefono: '+57 300 123 4567',
-    ciudad: 'Medellín, Colombia',
-  },
-};
+import { etiquetaSector } from '@/components/empresa/sectores';
+import { obtenerEmpresa } from '@/services/empresaService';
 
 function SectionTitle({ icon, children }) {
   return (
@@ -30,10 +16,53 @@ function SectionTitle({ icon, children }) {
 }
 
 export function EmpresaDetallePage() {
-  const e = EMPRESA;
+  const { id } = useParams();
+  const [empresa, setEmpresa] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelado = false;
+    setLoading(true);
+    setError('');
+    obtenerEmpresa(id)
+      .then((data) => {
+        if (!cancelado) setEmpresa(data);
+      })
+      .catch((err) => {
+        if (!cancelado) setError(err.message);
+      })
+      .finally(() => {
+        if (!cancelado) setLoading(false);
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="w-full max-w-4xl mx-auto text-center text-on-surface-variant py-16">
+        Cargando empresa...
+      </div>
+    );
+  }
+
+  if (error || !empresa) {
+    return (
+      <div className="w-full max-w-4xl mx-auto bg-surface-container-low rounded-2xl border border-white/10 p-8 text-center flex flex-col items-center gap-4">
+        <p className="text-body-md font-body-md text-error">
+          {error || 'No se encontró la empresa.'}
+        </p>
+        <Link className="text-primary hover:text-white transition-colors" to="/dashboard">
+          Volver al Dashboard
+        </Link>
+      </div>
+    );
+  }
 
   const copyNit = () => {
-    navigator.clipboard?.writeText(e.nit);
+    navigator.clipboard?.writeText(empresa.nit);
   };
 
   return (
@@ -46,14 +75,14 @@ export function EmpresaDetallePage() {
             Dashboard
           </Link>
           <span>/</span>
-          <span className="hover:text-primary transition-colors">Empresas Aliadas</span>
+          <span>Empresas Aliadas</span>
           <span>/</span>
           <span className="text-on-surface">Detalle de Organización</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-caption font-caption text-outline">ID de Registro:</span>
           <code className="px-2 py-0.5 rounded bg-surface-container-high border border-white/5 text-primary text-caption font-mono">
-            {e.idRegistro}
+            EMP-{empresa.id.slice(0, 8).toUpperCase()}
           </code>
         </div>
       </div>
@@ -68,29 +97,32 @@ export function EmpresaDetallePage() {
             <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-primary-container/30 to-secondary-container/40 border border-primary-container/40 flex items-center justify-center flex-shrink-0 shadow-lg shadow-black/50 relative">
               <Icon name="domain" className="text-3xl md:text-4xl text-primary-fixed" />
               <div
-                className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#00C897] rounded-full border-2 border-surface-container-low flex items-center justify-center"
-                title="Activa"
+                className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-surface-container-low flex items-center justify-center ${
+                  empresa.activa ? 'bg-[#00C897]' : 'bg-outline'
+                }`}
+                title={empresa.activa ? 'Activa' : 'Inactiva'}
               >
                 <span className="w-1.5 h-1.5 bg-white rounded-full" />
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
               <h1 className="text-headline-md sm:text-headline-lg font-headline-lg text-white font-bold tracking-tight">
-                {e.nombre}
+                {empresa.nombre}
               </h1>
               <p className="text-body-md font-body-md text-outline-variant flex items-center gap-1.5">
                 <Icon name="verified" className="text-[16px] text-tertiary" />
-                Empresa verificada en el ecosistema CESDE
+                Empresa registrada en el ecosistema CESDE
               </p>
-              <span className="text-caption font-caption text-outline">
-                Miembro activo desde {e.miembroDesde}
-              </span>
             </div>
           </div>
           <div className="self-start sm:self-center">
-            <Badge variant="success" withDot dotPulsing>
-              Activa
-            </Badge>
+            {empresa.activa ? (
+              <Badge variant="success" withDot dotPulsing>
+                Activa
+              </Badge>
+            ) : (
+              <Badge variant="tertiary">Inactiva</Badge>
+            )}
           </div>
         </div>
 
@@ -101,7 +133,7 @@ export function EmpresaDetallePage() {
             <InfoCard
               icon="badge"
               label="NIT"
-              value={e.nit}
+              value={empresa.nit}
               right={
                 <button
                   type="button"
@@ -113,16 +145,7 @@ export function EmpresaDetallePage() {
                 </button>
               }
             />
-            <InfoCard
-              icon="hub"
-              label="Sector Económico"
-              value={e.sector}
-              right={
-                <span className="px-2.5 py-1 rounded-md bg-secondary-container/40 border border-secondary/30 text-secondary text-caption font-caption">
-                  {e.etiquetaSector}
-                </span>
-              }
-            />
+            <InfoCard icon="hub" label="Sector Económico" value={etiquetaSector(empresa.sector)} />
           </div>
         </div>
 
@@ -133,30 +156,35 @@ export function EmpresaDetallePage() {
           <SectionTitle icon="contacts">Datos de Contacto</SectionTitle>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <ContactCard icon="person" label="Nombre del Contacto">
-              <p className="text-body-md font-body-md text-white font-semibold">{e.contacto.nombre}</p>
-              <p className="text-caption font-caption text-outline">{e.contacto.cargo}</p>
+              <p className="text-body-md font-body-md text-white font-semibold">
+                {empresa.contactoNombre || 'No registrado'}
+              </p>
             </ContactCard>
 
             <ContactCard icon="mail" label="Correo Electrónico">
-              <a
-                className="text-body-md font-body-md text-white font-semibold hover:text-primary transition-colors truncate block"
-                href={`mailto:${e.contacto.correo}`}
-              >
-                {e.contacto.correo}
-              </a>
-              <span className="text-caption font-caption text-emerald-400 flex items-center gap-1 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Canal Principal
-              </span>
+              {empresa.correo ? (
+                <a
+                  className="text-body-md font-body-md text-white font-semibold hover:text-primary transition-colors truncate block"
+                  href={`mailto:${empresa.correo}`}
+                >
+                  {empresa.correo}
+                </a>
+              ) : (
+                <p className="text-body-md font-body-md text-white font-semibold">No registrado</p>
+              )}
             </ContactCard>
 
             <ContactCard icon="call" label="Teléfono de Contacto">
-              <a
-                className="text-body-md font-body-md text-white font-semibold hover:text-primary transition-colors block"
-                href={`tel:${e.contacto.telefono.replace(/\s/g, '')}`}
-              >
-                {e.contacto.telefono}
-              </a>
-              <span className="text-caption font-caption text-outline">{e.contacto.ciudad}</span>
+              {empresa.telefono ? (
+                <a
+                  className="text-body-md font-body-md text-white font-semibold hover:text-primary transition-colors block"
+                  href={`tel:${empresa.telefono.replace(/\s/g, '')}`}
+                >
+                  {empresa.telefono}
+                </a>
+              ) : (
+                <p className="text-body-md font-body-md text-white font-semibold">No registrado</p>
+              )}
             </ContactCard>
           </div>
         </div>

@@ -2,20 +2,10 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Icon } from '@/components/common';
 import FormField from './FormField';
+import { SECTORES } from './sectores';
 
-const SECTORS = [
-  { value: 'TECNOLOGIA_Y_SOFTWARE', label: 'Tecnología y Software' },
-  { value: 'GASTRONOMIA_Y_TURISMO', label: 'Gastronomía y Turismo' },
-  { value: 'MANUFACTURA_E_INDUSTRIA', label: 'Manufactura e Industria' },
-  { value: 'COMERCIO_Y_RETAIL', label: 'Comercio y Retail' },
-  { value: 'SERVICIOS_FINANCIEROS', label: 'Servicios Financieros' },
-  { value: 'SALUD_Y_BIENESTAR', label: 'Salud y Bienestar' },
-  { value: 'EDUCACION', label: 'Educación' },
-  { value: 'LOGISTICA_Y_TRANSPORTE', label: 'Logística y Transporte' },
-  { value: 'OTRO', label: 'Otro' },
-];
-
-function EmpresaForm({ onSubmit }) {
+// loading: true mientras se guarda. error: texto del error (si lo hay).
+function EmpresaForm({ onSubmit, loading = false, error = '' }) {
   const [values, setValues] = useState({
     nit: '',
     companyName: '',
@@ -64,7 +54,7 @@ function EmpresaForm({ onSubmit }) {
         icon="domain"
         required
         placeholder="Selecciona el sector de tu organización"
-        options={SECTORS}
+        options={SECTORES}
         value={values.economicSector}
         onChange={handleChange}
       />
@@ -100,6 +90,12 @@ function EmpresaForm({ onSubmit }) {
         />
       </div>
 
+      {error && (
+        <div className="rounded-xl border border-error/40 bg-error-container/30 px-4 py-3 text-body-sm font-body-sm text-error">
+          {error}
+        </div>
+      )}
+
       <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <Link
           className="w-full sm:w-auto text-center order-2 sm:order-1 px-5 py-3 rounded-xl text-on-surface-variant hover:text-white text-label-md font-label-md border border-transparent hover:border-white/10 transition-all duration-200"
@@ -108,10 +104,10 @@ function EmpresaForm({ onSubmit }) {
           Cancelar
         </Link>
         <div className="w-full sm:w-auto order-1 sm:order-2">
-          <Button type="submit" variant="primary" className="w-full sm:w-auto">
+          <Button type="submit" variant="primary" className="w-full sm:w-auto" disabled={loading}>
             <span className="inline-flex items-center gap-2.5">
               <Icon name="check_circle" className="text-[20px]" />
-              <span>Guardar Empresa</span>
+              <span>{loading ? 'Guardando...' : 'Guardar Empresa'}</span>
             </span>
           </Button>
         </div>
