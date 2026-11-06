@@ -1,13 +1,8 @@
 // src/pages/dashboard/CrearRetoPage.jsx
-import { RetoLayout } from "../../layouts/RetoLayout";
-import { CreateChallengeForm } from "../../components/retos";
+import { CreateChallengeForm } from '@/components/retos';
 
 export const CrearRetoPage = () => {
-  return (
-    <RetoLayout>
-      <CreateChallengeForm />
-    </RetoLayout>
-  );
+  return <CreateChallengeForm />;
 };
 
 export default CrearRetoPage;

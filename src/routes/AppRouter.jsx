@@ -1,16 +1,19 @@
 // src/routes/AppRouter.jsx
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 
 // Layouts
 import { PublicLayout } from '@/layouts/PublicLayout';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
+import { RetoLayout } from '@/layouts/RetoLayout';
 
 // Páginas
 import { LandingPage } from '@/pages/landing/LandingPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { RegisterPage } from '@/pages/auth/RegisterPage';
 import { DashboardPage } from '@/pages/dashboard/DashboardPage';
+import { CrearRetoPage } from '@/pages/dashboard/CrearRetoPage';
+import { DetalleRetoPage } from '@/pages/retos/DetalleRetoPage';
 import { CrearEmpresaPage } from '@/pages/empresas/CrearEmpresaPage';
 import { EmpresaDetallePage } from '@/pages/empresas/EmpresaDetallePage';
 
@@ -18,20 +21,28 @@ import { EmpresaDetallePage } from '@/pages/empresas/EmpresaDetallePage';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 
 export const router = createBrowserRouter([
-  // Bloque Público: Landing Page
+  // 1. Bloque Público
   {
     path: '/',
-    element: <PublicLayout />,
+    element: (
+      <PublicLayout>
+        <Outlet />
+      </PublicLayout>
+    ),
     children: [
       { index: true, element: <LandingPage /> },
       { path: 'landing', element: <LandingPage /> },
     ],
   },
 
-  // Bloque Autenticación: Login y Registro
+  // 2. Bloque Auth
   {
     path: '/',
-    element: <AuthLayout />,
+    element: (
+      <AuthLayout>
+        <Outlet />
+      </AuthLayout>
+    ),
     children: [
       { path: 'login', element: <LoginPage /> },
       { path: 'registro', element: <RegisterPage /> },
@@ -39,12 +50,14 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // Bloque Privado: Dashboard protegido por sesión
+  // 3. Bloque Dashboard (Privado)
   {
     path: '/dashboard',
     element: (
       <ProtectedRoute>
-        <DashboardLayout />
+        <DashboardLayout>
+          <Outlet />
+        </DashboardLayout>
       </ProtectedRoute>
     ),
     children: [
@@ -54,7 +67,23 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // Fallback (Ruta 404): Redirecciona al inicio
+  // 4. Bloque Retos (Privado y Aislado de DashboardLayout)
+  {
+    path: '/dashboard/retos',
+    element: (
+      <ProtectedRoute>
+        <RetoLayout>
+          <Outlet />
+        </RetoLayout>
+      </ProtectedRoute>
+    ),
+    children: [
+      { path: 'nuevo', element: <CrearRetoPage /> },
+      { path: ':id', element: <DetalleRetoPage /> },
+    ],
+  },
+
+  // Fallback (Ruta 404)
   {
     path: '*',
     element: <Navigate to="/" replace />,
@@ -62,4 +91,3 @@ export const router = createBrowserRouter([
 ]);
 
 export default router;
-

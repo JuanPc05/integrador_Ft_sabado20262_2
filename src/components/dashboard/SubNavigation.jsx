@@ -1,6 +1,9 @@
 // src/components/dashboard/SubNavigation.jsx
+import { useNavigate } from 'react-router-dom';
 
 export const SubNavigation = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-container-low/80 p-2 md:p-3 rounded-2xl border border-white/5 backdrop-blur-md">
       
@@ -41,7 +44,11 @@ export const SubNavigation = () => {
 
       {/* Botón versión móvil para crear reto (Se oculta en Desktop) */}
       <div className="sm:hidden w-full pt-2">
-        <button className="w-full flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-container text-on-primary-container font-label-md text-label-md font-bold shadow-md">
+        <button
+          type="button"
+          onClick={() => navigate('/dashboard/retos/nuevo')}
+          className="w-full flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-container text-on-primary-container font-label-md text-label-md font-bold shadow-md cursor-pointer"
+        >
           <span className="material-symbols-outlined text-lg">add</span>
           <span>Publicar Nuevo Reto</span>
         </button>

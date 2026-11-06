@@ -1,20 +1,23 @@
 // src/components/dashboard/Header.jsx
+import { Link, useNavigate } from 'react-router-dom';
 
 export const Header = () => {
+  const navigate = useNavigate();
+
   return (
     <header className="bg-surface/80 backdrop-blur-md sticky top-0 z-50 shadow-lg shadow-black/40">
       <div className="flex justify-between items-center w-full px-6 md:px-12 max-w-7xl mx-auto h-20">
         
         {/* Logo Branding */}
         <div className="flex items-center gap-4">
-          <a className="flex items-center gap-3 group" href="#">
+          <Link className="flex items-center gap-3 group" to="/dashboard">
             <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center shadow-lg shadow-primary-container/20 group-hover:scale-105 transition-transform duration-200">
               <span className="font-headline-md font-extrabold text-on-primary-container tracking-tighter text-sm">CESDE</span>
             </div>
             <span className="text-headline-sm font-headline-sm font-extrabold text-on-surface tracking-tight group-hover:text-primary transition-colors">
               CESDE <span className="text-primary-container">Conecta</span>
             </span>
-          </a>
+          </Link>
           <span className="hidden lg:inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-caption bg-surface-container-high text-primary border border-outline-variant/30">
             Portal Empresas
           </span>
@@ -45,7 +48,11 @@ export const Header = () => {
           </button>
           
           {/* CTA Principal */}
-          <button className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-container text-on-primary-container font-label-md text-label-md font-bold shadow-lg shadow-primary-container/25 hover:opacity-95 active:scale-95 transition-all">
+          <button
+            type="button"
+            onClick={() => navigate('/dashboard/retos/nuevo')}
+            className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-container text-on-primary-container font-label-md text-label-md font-bold shadow-lg shadow-primary-container/25 hover:opacity-95 active:scale-95 transition-all cursor-pointer"
+          >
             <span className="material-symbols-outlined text-lg">add</span>
             <span>Publicar Nuevo Reto</span>
           </button>

@@ -1,5 +1,6 @@
 // src/layouts/RetoLayout.jsx
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 export const RetoLayout = ({ children, showHelpLink = true }) => {
   return (
@@ -55,15 +56,15 @@ export const RetoLayout = ({ children, showHelpLink = true }) => {
               </>
             )}
 
-            <a
-              href="#"
+            <Link
+              to="/dashboard"
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container border border-white/10 hover:border-primary-container/50 hover:bg-surface-bright text-on-surface font-label-md text-label-md transition-all duration-200 active:scale-95 group"
             >
               <span className="material-symbols-outlined text-[18px] text-primary group-hover:-translate-x-1 transition-transform">
                 arrow_back
               </span>
               <span>Volver al Dashboard</span>
-            </a>
+            </Link>
           </div>
         </div>
       </header>
