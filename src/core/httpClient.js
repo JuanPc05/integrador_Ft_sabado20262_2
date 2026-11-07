@@ -1,24 +1,70 @@
-// src/services/httpClient.js
+// src/core/httpClient.js
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 export const TOKEN_STORAGE_KEY = 'accessToken';
 export const USER_STORAGE_KEY = 'cesde_user';
 
 /**
- * Error personalizado para respuestas HTTP no exitosas.
+ * Extrae el mensaje detallado de validación o error de negocio enviado por Spring Boot.
+ * Soporta tanto mapas/arrays de validación (validationErrors, errors, errores)
+ * como mensajes directos (message, mensaje).
  */
-export class HttpError extends Error {
-  constructor(message, status, data = null) {
-    super(message);
-    this.name = 'HttpError';
-    this.status = status;
-    this.data = data;
+function extractBackendErrorMessage(errorData, status) {
+  if (!errorData) {
+    return `Error en la petición HTTP (${status})`;
   }
+
+  // 1. Buscar en colecciones de errores de validación de campos (MethodArgumentNotValidException)
+  const validationContainer =
+    errorData.validationErrors || errorData.errors || errorData.errores;
+
+  if (validationContainer) {
+    // Si es un Array (ej. [{ defaultMessage: "..." }] o ["..."])
+    if (Array.isArray(validationContainer) && validationContainer.length > 0) {
+      const messages = validationContainer
+        .map((item) =>
+          typeof item === 'string'
+            ? item
+            : item?.defaultMessage || item?.message || item?.mensaje
+        )
+        .filter(Boolean);
+
+      if (messages.length > 0) {
+        return messages.join(' ');
+      }
+    }
+
+    // Si es un Objeto/Mapa clave-valor (ej. { password: "La contraseña debe tener entre 8 y 100 caracteres." })
+    if (typeof validationContainer === 'object' && !Array.isArray(validationContainer)) {
+      const messages = Object.values(validationContainer).filter(
+        (val) => typeof val === 'string' && val.trim().length > 0
+      );
+
+      if (messages.length > 0) {
+        return messages.join(' ');
+      }
+    }
+  }
+
+  // 2. Si no hay errores de campos específicos, usar message o mensaje
+  if (errorData.message) {
+    return errorData.message;
+  }
+
+  if (errorData.mensaje) {
+    return errorData.mensaje;
+  }
+
+  if (errorData.error) {
+    return errorData.error;
+  }
+
+  // 3. Fallback genérico por defecto
+  return `Ocurrió un error inesperado en el servidor (${status}).`;
 }
 
 /**
  * Función núcleo que intercepta peticiones, inyecta el JWT y procesa respuestas HTTP.
- * Cumple con SRP: su única responsabilidad es el transporte HTTP.
  */
 async function request(endpoint, options = {}) {
   const token = localStorage.getItem(TOKEN_STORAGE_KEY);
@@ -37,26 +83,19 @@ async function request(endpoint, options = {}) {
 
   const response = await fetch(`${BASE_URL}${endpoint}`, config);
 
-  // Manejo de respuestas sin contenido (204 No Content)
+  // Si la respuesta NO es exitosa, parsear el cuerpo del error antes de lanzar
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    const mensajeExtraido = extractBackendErrorMessage(errorData, response.status);
+    throw new Error(mensajeExtraido);
+  }
+
+  // Manejo de respuestas exitosas sin contenido (204 No Content)
   if (response.status === 204) {
     return null;
   }
 
-  // Intentar parsear el cuerpo como JSON de forma segura
-  const data = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    // Extrae el mensaje estructurado del backend (ErrorResponse de Spring Boot: data.mensaje)
-    const backendMessage =
-      data?.mensaje ||
-      data?.message ||
-      data?.error ||
-      `Error en la petición HTTP (${response.status})`;
-
-    throw new HttpError(backendMessage, response.status, data);
-  }
-
-  return data;
+  return response.json().catch(() => null);
 }
 
 export const httpClient = {
@@ -82,4 +121,3 @@ export const httpClient = {
 };
 
 export default httpClient;
-

@@ -11,6 +11,7 @@ import { RetoLayout } from '@/core/RetoLayout';
 import { LandingPage } from '@/features/landing/LandingPage';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { RegisterPage } from '@/features/auth/Register';
+import { PerfilPage } from '@/features/auth/PerfilPage';
 import { DashboardPage } from '@/features/empresas/DashboardPage';
 import { CrearRetoPage } from '@/features/retos/CrearRetoPage';
 import { DetalleRetoPage } from '@/features/retos/DetalleRetoPage';
@@ -62,6 +63,8 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <DashboardPage /> },
+      { path: 'perfil', element: <PerfilPage /> },
+      { path: 'empresa/configuracion', element: <EmpresaDetallePage /> },
       { path: 'empresas/nueva', element: <CrearEmpresaPage /> },
       { path: 'empresas/:id', element: <EmpresaDetallePage /> },
     ],

@@ -15,24 +15,40 @@ const SECTORS = [
   { value: 'OTRO', label: 'Otro' },
 ];
 
-function EmpresaForm({ onSubmit }) {
-  const [values, setValues] = useState({
-    nit: '',
-    companyName: '',
-    economicSector: '',
-    contactName: '',
-    contactEmail: '',
-    contactPhone: '',
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setValues((prev) => ({ ...prev, [name]: value }));
-  };
+function EmpresaForm({ initialData = null, onSubmit, isSubmitting = false }) {
+  const [nit, setNit] = useState(initialData?.nit || '');
+  const [nombre, setNombre] = useState(initialData?.nombre || initialData?.companyName || '');
+  const [sector, setSector] = useState(initialData?.sector || initialData?.economicSector || '');
+  const [contactoNombre, setContactoNombre] = useState(
+    initialData?.contactoNombre ||
+      initialData?.contacto?.nombre ||
+      initialData?.contactName ||
+      ''
+  );
+  const [correo, setCorreo] = useState(
+    initialData?.correo ||
+      initialData?.contacto?.correo ||
+      initialData?.contactEmail ||
+      ''
+  );
+  const [telefono, setTelefono] = useState(
+    initialData?.telefono ||
+      initialData?.contacto?.telefono ||
+      initialData?.contactPhone ||
+      ''
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit?.(values);
+    const payload = {
+      nit: nit.trim(),
+      nombre: nombre.trim(),
+      sector,
+      contactoNombre: contactoNombre.trim(),
+      correo: correo.trim(),
+      telefono: telefono.trim(),
+    };
+    onSubmit?.(payload);
   };
 
   return (
@@ -44,59 +60,59 @@ function EmpresaForm({ onSubmit }) {
           icon="badge"
           required
           placeholder="Ej. 900.123.456-7"
-          value={values.nit}
-          onChange={handleChange}
+          value={nit}
+          onChange={(e) => setNit(e.target.value)}
         />
         <FormField
-          id="companyName"
+          id="nombre"
           label="Nombre de la Empresa"
           icon="corporate_fare"
           required
           placeholder="Ej. NovaLogistics S.A.S."
-          value={values.companyName}
-          onChange={handleChange}
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
         />
       </div>
 
       <FormField
-        id="economicSector"
+        id="sector"
         label="Sector Económico"
         icon="domain"
         required
         placeholder="Selecciona el sector de tu organización"
         options={SECTORS}
-        value={values.economicSector}
-        onChange={handleChange}
+        value={sector}
+        onChange={(e) => setSector(e.target.value)}
       />
 
       <FormField
-        id="contactName"
+        id="contactoNombre"
         label="Nombre del Contacto"
         icon="person"
         placeholder="Ej. Carlos Arango o Persona de Enlace"
-        value={values.contactName}
-        onChange={handleChange}
+        value={contactoNombre}
+        onChange={(e) => setContactoNombre(e.target.value)}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <FormField
-          id="contactEmail"
+          id="correo"
           label="Correo de Contacto"
           icon="mail"
           type="email"
           required
           placeholder="contacto@empresa.com"
-          value={values.contactEmail}
-          onChange={handleChange}
+          value={correo}
+          onChange={(e) => setCorreo(e.target.value)}
         />
         <FormField
-          id="contactPhone"
+          id="telefono"
           label="Teléfono de Contacto"
           icon="call"
           type="tel"
           placeholder="+57 300 123 4567"
-          value={values.contactPhone}
-          onChange={handleChange}
+          value={telefono}
+          onChange={(e) => setTelefono(e.target.value)}
         />
       </div>
 
@@ -108,10 +124,15 @@ function EmpresaForm({ onSubmit }) {
           Cancelar
         </Link>
         <div className="w-full sm:w-auto order-1 sm:order-2">
-          <Button type="submit" variant="primary" className="w-full sm:w-auto">
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={isSubmitting}
+            className="w-full sm:w-auto"
+          >
             <span className="inline-flex items-center gap-2.5">
               <Icon name="check_circle" className="text-[20px]" />
-              <span>Guardar Empresa</span>
+              <span>{isSubmitting ? 'Guardando...' : 'Guardar Empresa'}</span>
             </span>
           </Button>
         </div>

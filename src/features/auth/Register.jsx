@@ -35,7 +35,7 @@ function Register() {
               </p>
             </div>
 
-            <RegisterForm onSubmit={handleRegister} />
+            <RegisterForm />
           </div>
         </div>
       </main>

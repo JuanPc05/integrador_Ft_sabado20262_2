@@ -1,9 +1,17 @@
+// src/features/auth/components/PasswordField.jsx
 import { useState } from 'react';
 import { Icon } from '@/components/common';
 import InputField from './InputField';
 import PasswordStrength from './PasswordStrength';
 
-function PasswordField({ value, onChange }) {
+function PasswordField({
+  value,
+  onChange,
+  required = true,
+  disabled = false,
+  label = 'Contraseña',
+  placeholder = 'Crea una contraseña segura',
+}) {
   const [visible, setVisible] = useState(false);
 
   const toggleButton = (
@@ -20,11 +28,12 @@ function PasswordField({ value, onChange }) {
   return (
     <InputField
       id="password"
-      label="Contraseña"
+      label={label}
       icon="lock"
       type={visible ? 'text' : 'password'}
-      placeholder="Crea una contraseña segura"
-      required
+      placeholder={placeholder}
+      required={required}
+      disabled={disabled}
       value={value}
       onChange={onChange}
       rightSlot={toggleButton}
