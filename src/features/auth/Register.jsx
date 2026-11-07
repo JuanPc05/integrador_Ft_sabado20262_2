@@ -4,11 +4,6 @@ import Navbar from '@/core/Navbar';
 import Footer from '@/core/Footer';
 
 function Register() {
-  const handleRegister = (values) => {
-    // TODO: conectar con la API de registro
-    console.log('Registro:', values);
-  };
-
   return (
     <div className="bg-background text-on-surface antialiased selection:bg-primary-container selection:text-white min-h-screen flex flex-col justify-between relative overflow-x-hidden">
       {/* Brillos de fondo */}

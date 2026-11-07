@@ -1,5 +1,4 @@
-// src/layouts/RetoLayout.jsx
-import React from 'react';
+// src/core/RetoLayout.jsx
 import { Link } from 'react-router-dom';
 
 export const RetoLayout = ({ children, showHelpLink = true }) => {

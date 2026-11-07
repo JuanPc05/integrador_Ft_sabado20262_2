@@ -1,5 +1,5 @@
 // src/features/auth/components/RegisterForm.jsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Icon } from '@/components/common';
 import { authService } from '@/features/auth/auth.service';
@@ -26,33 +26,21 @@ function RegisterForm({ initialData = null, onSubmit }) {
   const isEditMode = Boolean(initialData);
 
   const [values, setValues] = useState({
-    fullName: '',
-    email: '',
+    fullName:
+      initialData?.nombreCompleto ||
+      initialData?.nombre_completo ||
+      initialData?.fullName ||
+      '',
+    email: initialData?.email || '',
     password: '',
-    userRole: '',
+    userRole:
+      ROLE_MAP[initialData?.rol] ||
+      initialData?.rol ||
+      initialData?.userRole ||
+      '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  // Pre-llenar estados locales cuando initialData viene con datos (Modo Edición)
-  useEffect(() => {
-    if (initialData) {
-      setValues({
-        fullName:
-          initialData.nombreCompleto ||
-          initialData.nombre_completo ||
-          initialData.fullName ||
-          '',
-        email: initialData.email || '',
-        password: '',
-        userRole:
-          ROLE_MAP[initialData.rol] ||
-          initialData.rol ||
-          initialData.userRole ||
-          '',
-      });
-    }
-  }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

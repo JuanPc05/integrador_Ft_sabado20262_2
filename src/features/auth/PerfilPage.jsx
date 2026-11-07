@@ -66,7 +66,11 @@ export function PerfilPage() {
           </div>
         )}
 
-        <RegisterForm initialData={user} onSubmit={handleUpdateProfile} />
+        <RegisterForm
+          key={user?.id || 'perfil'}
+          initialData={user}
+          onSubmit={handleUpdateProfile}
+        />
       </div>
     </div>
   );

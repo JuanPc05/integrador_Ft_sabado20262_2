@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Badge, Button, Icon } from '@/components/common';
 import InfoCard from '@/features/empresas/components/empresa/InfoCard';
@@ -20,39 +20,40 @@ export function EmpresaDetallePage() {
   const { id: paramId } = useParams();
   const { user } = useAuth();
   const [empresa, setEmpresa] = useState(null);
-  const [loading, setLoading] = useState(true);
+
+  const empresaId = empresa?.idRegistro || paramId || user?.idEmpresa || user?.empresaId || user?.empresa?.id;
+
+  const [loading, setLoading] = useState(Boolean(empresaId));
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  const empresaId = empresa?.idRegistro || paramId || user?.idEmpresa || user?.empresaId || user?.empresa?.id;
-
-  const mapearDatosEmpresa = (data) => ({
-    idRegistro: data.id,
-    nombre: data.nombre,
-    miembroDesde: 'Ecosistema Proyecta CESDE',
-    nit: data.nit,
-    sector: data.sector,
-    etiquetaSector: data.sector,
-    activa: data.activa ?? true,
-    contactoNombre: data.contactoNombre || '',
-    correo: data.correo || '',
-    telefono: data.telefono || '',
-    contacto: {
-      nombre: data.contactoNombre || user?.nombreCompleto || 'Sin contacto asignado',
-      cargo: 'Representante de Empresa',
-      correo: data.correo || user?.email || '',
-      telefono: data.telefono || 'No registrado',
-      ciudad: 'Medellín, Colombia',
-    },
-  });
+  const mapearDatosEmpresa = useCallback(
+    (data) => ({
+      idRegistro: data.id,
+      nombre: data.nombre,
+      miembroDesde: 'Ecosistema Proyecta CESDE',
+      nit: data.nit,
+      sector: data.sector,
+      etiquetaSector: data.sector,
+      activa: data.activa ?? true,
+      contactoNombre: data.contactoNombre || '',
+      correo: data.correo || '',
+      telefono: data.telefono || '',
+      contacto: {
+        nombre: data.contactoNombre || user?.nombreCompleto || 'Sin contacto asignado',
+        cargo: 'Representante de Empresa',
+        correo: data.correo || user?.email || '',
+        telefono: data.telefono || 'No registrado',
+        ciudad: 'Medellín, Colombia',
+      },
+    }),
+    [user?.nombreCompleto, user?.email]
+  );
 
   useEffect(() => {
-    if (!empresaId) {
-      setLoading(false);
-      return;
-    }
+    if (!empresaId) return;
 
     let isMounted = true;
     const cargarEmpresa = async () => {
@@ -79,7 +80,7 @@ export function EmpresaDetallePage() {
     return () => {
       isMounted = false;
     };
-  }, [empresaId, user?.nombreCompleto, user?.email]);
+  }, [empresaId, mapearDatosEmpresa]);
 
   const handleGuardarEmpresa = async (payload) => {
     setIsSaving(true);

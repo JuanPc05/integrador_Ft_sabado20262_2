@@ -1,4 +1,3 @@
-import React from 'react';
 // Importamos todas las secciones gracias a tu Patrón Barril (index.js)
 import { 
   HeroSection, 

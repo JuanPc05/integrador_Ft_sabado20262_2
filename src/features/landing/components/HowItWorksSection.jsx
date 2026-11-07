@@ -1,5 +1,3 @@
-import React from 'react';
-
 // 1. Separamos los DATOS de la VISTA
 const STEPS = [
   {

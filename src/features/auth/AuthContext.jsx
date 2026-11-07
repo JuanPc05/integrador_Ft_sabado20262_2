@@ -1,34 +1,31 @@
-// src/context/AuthContext.jsx
-import { createContext, useState, useEffect, useCallback, useMemo } from 'react';
+// src/features/auth/AuthContext.jsx
+import { createContext, useState, useCallback, useMemo } from 'react';
 import { authService } from '@/features/auth/auth.service';
 import { TOKEN_STORAGE_KEY, USER_STORAGE_KEY } from '@/core/httpClient';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  // Hidratar el estado de sesión al recargar la aplicación
-  useEffect(() => {
+  const [user, setUser] = useState(() => {
     try {
       const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
       const storedUser = localStorage.getItem(USER_STORAGE_KEY);
-
-      if (storedToken) {
-        setIsAuthenticated(true);
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-      }
+      return storedToken && storedUser ? JSON.parse(storedUser) : null;
     } catch {
       localStorage.removeItem(TOKEN_STORAGE_KEY);
       localStorage.removeItem(USER_STORAGE_KEY);
-    } finally {
-      setLoading(false);
+      return null;
     }
-  }, []);
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    try {
+      return Boolean(localStorage.getItem(TOKEN_STORAGE_KEY));
+    } catch {
+      return false;
+    }
+  });
+  const [loading, setLoading] = useState(false);
 
   /**
    * Ejecuta el flujo de inicio de sesión contra el servicio de dominio,
