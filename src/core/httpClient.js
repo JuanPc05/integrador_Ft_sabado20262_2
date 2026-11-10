@@ -67,7 +67,8 @@ function extractBackendErrorMessage(errorData, status) {
  * Función núcleo que intercepta peticiones, inyecta el JWT y procesa respuestas HTTP.
  */
 async function request(endpoint, options = {}) {
-  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+  const token =
+    localStorage.getItem(TOKEN_STORAGE_KEY) || localStorage.getItem('token');
 
   const headers = {
     'Content-Type': 'application/json',

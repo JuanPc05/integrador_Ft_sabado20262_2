@@ -1,33 +1,11 @@
-// src/components/retos/ChallengeClassificationSection.jsx
-
-// Datos por defecto basados en el HTML (listos para ser reemplazados por datos del backend)
-const DEFAULT_EMPRESAS = [
-  { id: "1", nombre: "NovaLogistics S.A.S." },
-  { id: "2", nombre: "Tech Innovators S.A.S." },
-  { id: "3", nombre: "BioHealth Solutions" },
-  { id: "4", nombre: "Antioquia Data Labs" },
-  { id: "5", nombre: "FinTech Andina S.A." },
-];
-
-const DEFAULT_CATEGORIAS = [
-  { value: "web-cloud", label: "Desarrollo Web & Cloud" },
-  { value: "ai-data", label: "Inteligencia Artificial & Datos" },
-  { value: "iot-auto", label: "Automatización & IoT" },
-  { value: "cybersec", label: "Ciberseguridad Aplicada" },
-  { value: "logistics", label: "Logística Digital & Supply" },
-  { value: "ux-design", label: "Diseño UX & Producto Digital" },
-];
-
-const DEFAULT_PRIORIDADES = [
-  { value: "alta", label: "Alta / Urgente", colorClass: "text-[#ffb4ab]" },
-  { value: "media", label: "Media", colorClass: "text-[#ffb1c5]" },
-  { value: "estandar", label: "Estándar / Baja", colorClass: "text-[#7df4ff]" },
-];
+// src/features/retos/ChallengeClassificationSection.jsx
 
 export const ChallengeClassificationSection = ({
   formData = {},
   onChange,
-  empresas = DEFAULT_EMPRESAS,
+  empresas = [],
+  categorias = [],
+  prioridades = [],
 }) => {
   return (
     <section className="space-y-6">
@@ -74,15 +52,21 @@ export const ChallengeClassificationSection = ({
               >
                 Selecciona la empresa postulante
               </option>
-              {empresas.map((empresa) => (
-                <option
-                  key={empresa.id}
-                  className="bg-surface-container text-on-surface"
-                  value={empresa.id}
-                >
-                  {empresa.nombre}
+              {empresas.length === 0 ? (
+                <option className="bg-surface-container text-outline" disabled>
+                  Cargando opciones...
                 </option>
-              ))}
+              ) : (
+                empresas.map((empresa) => (
+                  <option
+                    key={empresa.id}
+                    className="bg-surface-container text-on-surface"
+                    value={empresa.id}
+                  >
+                    {empresa.nombre}
+                  </option>
+                ))
+              )}
             </select>
             <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-outline">
               <span className="material-symbols-outlined text-[18px]">
@@ -122,15 +106,21 @@ export const ChallengeClassificationSection = ({
               >
                 Selecciona la categoría
               </option>
-              {DEFAULT_CATEGORIAS.map((cat) => (
-                <option
-                  key={cat.value}
-                  className="bg-surface-container text-on-surface"
-                  value={cat.value}
-                >
-                  {cat.label}
+              {categorias.length === 0 ? (
+                <option className="bg-surface-container text-outline" disabled>
+                  Cargando opciones...
                 </option>
-              ))}
+              ) : (
+                categorias.map((cat) => (
+                  <option
+                    key={cat.id}
+                    className="bg-surface-container text-on-surface"
+                    value={cat.id}
+                  >
+                    {cat.nombre}
+                  </option>
+                ))
+              )}
             </select>
             <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-outline">
               <span className="material-symbols-outlined text-[18px]">
@@ -170,15 +160,21 @@ export const ChallengeClassificationSection = ({
               >
                 Selecciona la prioridad
               </option>
-              {DEFAULT_PRIORIDADES.map((prio) => (
-                <option
-                  key={prio.value}
-                  className={`bg-surface-container ${prio.colorClass}`}
-                  value={prio.value}
-                >
-                  {prio.label}
+              {prioridades.length === 0 ? (
+                <option className="bg-surface-container text-outline" disabled>
+                  Cargando opciones...
                 </option>
-              ))}
+              ) : (
+                prioridades.map((prio) => (
+                  <option
+                    key={prio.id}
+                    className="bg-surface-container text-on-surface"
+                    value={prio.id}
+                  >
+                    {prio.nombre}
+                  </option>
+                ))
+              )}
             </select>
             <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-outline">
               <span className="material-symbols-outlined text-[18px]">
