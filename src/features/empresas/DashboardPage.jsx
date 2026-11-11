@@ -1,4 +1,7 @@
-// src/pages/dashboard/DashboardMainPage.jsx
+// src/features/empresas/DashboardPage.jsx
+import { useState, useEffect, useMemo } from 'react';
+import { useAuth } from '@/features/auth/useAuth';
+import { retoService } from '@/features/retos/reto.service';
 import { SubNavigation } from '@/features/empresas/components/dashboard/SubNavigation';
 import { KpiCard } from '@/features/empresas/components/dashboard/KpiCard';
 import { ChallengeTable } from '@/features/empresas/components/dashboard/ChallengeTable';
@@ -7,26 +10,126 @@ import { SupportBanner } from '@/features/empresas/components/dashboard/SupportB
 import { NextSessionCard } from '@/features/empresas/components/dashboard/NextSessionCard';
 
 export const DashboardMainPage = () => {
+  const { user } = useAuth();
+  const [retos, setRetos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const cargarRetos = async () => {
+      setLoading(true);
+      try {
+        const data = await retoService.obtenerTodos();
+        const listaRetos = Array.isArray(data) ? data : [];
+
+        let retosFiltrados = listaRetos;
+
+        if (user?.rol === 'ADMIN_UNIVERSIDAD') {
+          retosFiltrados = listaRetos;
+        } else if (user?.rol === 'REPRESENTANTE_EMPRESA') {
+          const userEmpresaId = user?.idEmpresa || user?.empresaId || user?.empresa?.id;
+          retosFiltrados = listaRetos.filter(
+            (reto) => reto.idEmpresa === userEmpresaId
+          );
+        }
+
+        if (isMounted) {
+          setRetos(retosFiltrados);
+        }
+      } catch {
+        if (isMounted) {
+          setRetos([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    cargarRetos();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.rol, user?.idEmpresa, user?.empresaId, user?.empresa?.id]);
+
+  // Cálculos derivados memorizados con useMemo a partir de los retos en estado
+  const retosActivos = useMemo(
+    () =>
+      retos.filter((r) => {
+        const estado = r.estado || r.estadoActual;
+        return (
+          estado === 'EN_CONVOCATORIA' ||
+          estado === 'RADICADO' ||
+          estado === 'EN_REVISION'
+        );
+      }).length,
+    [retos]
+  );
+
+  const proyectosDesarrollo = useMemo(
+    () =>
+      retos.filter((r) => {
+        const estado = r.estado || r.estadoActual;
+        return estado === 'EN_DESARROLLO' || estado === 'ASIGNADO';
+      }).length,
+    [retos]
+  );
+
+  const retosFinalizados = useMemo(
+    () =>
+      retos.filter((r) => {
+        const estado = r.estado || r.estadoActual;
+        return estado === 'FINALIZADO' || estado === 'RESUELTO';
+      }).length,
+    [retos]
+  );
+
+  const equiposPostulados = useMemo(
+    () =>
+      retos.reduce(
+        (acc, r) =>
+          acc +
+          (Array.isArray(r.equipos)
+            ? r.equipos.length
+            : Array.isArray(r.assignedGroups)
+              ? r.assignedGroups.length
+              : 0),
+        0
+      ),
+    [retos]
+  );
+
+  const tasaExito = useMemo(
+    () =>
+      retos.length === 0
+        ? 0
+        : Math.round((retosFinalizados / retos.length) * 100),
+    [retos.length, retosFinalizados]
+  );
+
   // Arreglo de datos para iterar los KPIs dinámicamente
   const kpiData = [
     { 
-      id: 1, title: "Total Retos Activos", icon: "flag", value: "4", 
-      trendIcon: "trending_up", trendText: "+1 este mes", subtitle: "Convocatorias simultáneas", 
+      id: 1, title: "Total Retos Activos", icon: "flag", value: String(retosActivos), 
+      trendIcon: "trending_up", trendText: `${retos.length} registrados`, subtitle: "Convocatorias simultáneas", 
       colorClass: "text-primary", bgClass: "bg-primary-container/10", hoverClass: "hover:border-primary-container/30" 
     },
     { 
-      id: 2, title: "Equipos Postulados", icon: "group_work", value: "12", 
-      trendIcon: "bolt", trendText: "48 estudiantes", subtitle: "Talento evaluando desafíos", 
+      id: 2, title: "Equipos Postulados", icon: "group_work", value: String(equiposPostulados), 
+      trendIcon: "bolt", trendText: `${equiposPostulados * 4} estudiantes`, subtitle: "Talento evaluando desafíos", 
       colorClass: "text-tertiary", bgClass: "bg-tertiary-container/20", hoverClass: "hover:border-tertiary/30" 
     },
     { 
-      id: 3, title: "Proyectos en Desarrollo", icon: "pending_actions", value: "2", 
-      trendIcon: "", trendText: "Sprint 3 en curso", subtitle: "Con acompañamiento docente", 
+      id: 3, title: "Proyectos en Desarrollo", icon: "pending_actions", value: String(proyectosDesarrollo), 
+      trendIcon: "", trendText: "En ejecución", subtitle: "Con acompañamiento docente", 
       colorClass: "text-secondary", bgClass: "bg-secondary-container/30", hoverClass: "hover:border-secondary/30" 
     },
     { 
-      id: 4, title: "Tasa de Éxito", icon: "verified_user", value: "98%", 
-      trendIcon: "check_circle", trendText: "14 completados", subtitle: "Cumplimiento metodológico", 
+      id: 4, title: "Tasa de Éxito", icon: "verified_user", value: `${tasaExito}%`, 
+      trendIcon: "check_circle", trendText: `${retosFinalizados} completados`, subtitle: "Cumplimiento metodológico", 
       colorClass: "text-primary-fixed", bgClass: "bg-surface-container-high", hoverClass: "hover:border-primary-container/30" 
     }
   ];
@@ -47,7 +150,7 @@ export const DashboardMainPage = () => {
         
         {/* Columna Izquierda */}
         <section className="lg:col-span-8 flex flex-col gap-6">
-          <ChallengeTable />
+          <ChallengeTable retos={retos} loading={loading} />
           <SupportBanner />
         </section>
         

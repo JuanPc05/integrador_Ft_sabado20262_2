@@ -71,6 +71,7 @@ graph LR
 | **Auth** | `POST` | `/api/v1/auth/login` | Autenticación con email, password y flag rememberMe | Público |
 | **Auth** | `POST` | `/api/v1/auth/register` | Registro inicial de usuarios según formulario de React | Público |
 | **Auth** | `POST` | `/api/v1/auth/refresh-token` | Renovación de token JWT si `rememberMe` fue activado | Público / Cookie |
+| **Dashboard** | `GET` | `/api/dashboard/stats` | Retorna las estadísticas agregadas en tiempo real para los KPIs del Dashboard (`DashboardStatsDTO`), filtrables opcionalmente por `idEmpresa` | `ADMIN_UNIVERSIDAD`, `REPRESENTANTE_EMPRESA` |
 | **Dashboard** | `GET` | `/api/v1/dashboard/empresa/kpis` | Retorna los 4 KPIs del panel superior de la empresa autenticada | `ROLE_EMPRESA` |
 | **Dashboard** | `GET` | `/api/v1/dashboard/empresa/perfil-resumen` | Datos del Header (Nombre de empresa, verificación, badge) | `ROLE_EMPRESA` |
 | **Dashboard** | `GET` | `/api/v1/dashboard/proxima-sesion` | Información del widget `NextSessionCard` (Demo Day, fecha) | `ROLE_EMPRESA`, `ROLE_DOCENTE`, `ROLE_ESTUDIANTE` |
@@ -195,6 +196,19 @@ El formulario gestiona `values`: `{ fullName: '', email: '', password: '', userR
 ---
 
 ### 2.4. Dashboard: KPIs y Perfil de Header
+
+#### `GET /api/dashboard/stats` (Opcional: `?idEmpresa={uuid}`)
+Devuelve las métricas agregadas en tiempo real para las tarjetas KPI del Dashboard de Empresas y Universidad:
+```json
+// Response DTO (DashboardStatsDTO)
+{
+  "totalRetosActivos": 4,
+  "equiposPostulados": 12,
+  "proyectosEnDesarrollo": 2,
+  "retosCompletados": 1,
+  "tasaExito": 25.0
+}
+```
 
 #### `GET /api/v1/dashboard/empresa/kpis`
 Alimenta directamente el mapeo de `kpiData` en `DashboardMainPage.jsx`:

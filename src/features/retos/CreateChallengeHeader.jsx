@@ -1,6 +1,6 @@
 // src/components/retos/CreateChallengeHeader.jsx
 
-export const CreateChallengeHeader = () => {
+export const CreateChallengeHeader = ({ isEditMode = false }) => {
   return (
     <div className="mb-10">
       {/* Stylized Status Badge con punto pulsante */}
@@ -10,13 +10,13 @@ export const CreateChallengeHeader = () => {
           <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10b981]"></span>
         </span>
         <span className="font-semibold uppercase tracking-wider">
-          PUBLICACIÓN DE RETOS
+          {isEditMode ? "EDICIÓN DE RETOS" : "PUBLICACIÓN DE RETOS"}
         </span>
       </div>
 
       {/* Título Principal */}
       <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold mb-3">
-        Crear Reto de Innovación
+        {isEditMode ? "Actualizar Reto" : "Crear Reto de Innovación"}
       </h1>
 
       {/* Subtítulo */}

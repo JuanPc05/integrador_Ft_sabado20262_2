@@ -27,11 +27,16 @@ export const SubNavigation = () => {
           <span>Panel Principal</span>
         </NavLink>
         
-        {/* Pestañas Inactivas */}
-        <a className="px-4 py-2 rounded-xl text-label-md font-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all flex items-center gap-2 whitespace-nowrap" href="#">
-          <span className="material-symbols-outlined text-base">military_tech</span>
-          <span>Mis Retos</span>
-        </a>
+        {/* Pestañas exclusivas para REPRESENTANTE_EMPRESA */}
+        {user?.rol === 'REPRESENTANTE_EMPRESA' && (
+          <a
+            className="px-4 py-2 rounded-xl text-label-md font-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all flex items-center gap-2 whitespace-nowrap"
+            href="#"
+          >
+            <span className="material-symbols-outlined text-base">military_tech</span>
+            <span>Mis Retos</span>
+          </a>
+        )}
         
         <a className="px-4 py-2 rounded-xl text-label-md font-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all flex items-center gap-2 whitespace-nowrap" href="#">
           <span className="material-symbols-outlined text-base">groups</span>
@@ -47,19 +52,38 @@ export const SubNavigation = () => {
           <span>Mensajes y Comentarios</span>
         </a>
         
-        <NavLink
-          to="/dashboard/empresa/configuracion"
-          className={({ isActive }) =>
-            `px-4 py-2 rounded-xl text-label-md font-label-md flex items-center gap-2 transition-all whitespace-nowrap ${
-              isActive
-                ? 'font-semibold bg-primary-container text-on-primary-container shadow-sm'
-                : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
-            }`
-          }
-        >
-          <span className="material-symbols-outlined text-base">settings</span>
-          <span>Configuración de Empresa</span>
-        </NavLink>
+        {user?.rol === 'REPRESENTANTE_EMPRESA' && (
+          <NavLink
+            to="/dashboard/empresa/configuracion"
+            className={({ isActive }) =>
+              `px-4 py-2 rounded-xl text-label-md font-label-md flex items-center gap-2 transition-all whitespace-nowrap ${
+                isActive
+                  ? 'font-semibold bg-primary-container text-on-primary-container shadow-sm'
+                  : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
+              }`
+            }
+          >
+            <span className="material-symbols-outlined text-base">settings</span>
+            <span>Configuración de Empresa</span>
+          </NavLink>
+        )}
+
+        {/* Pestaña exclusiva para ADMIN_UNIVERSIDAD */}
+        {user?.rol === 'ADMIN_UNIVERSIDAD' && (
+          <NavLink
+            to="/dashboard/catalogos"
+            className={({ isActive }) =>
+              `px-4 py-2 rounded-xl text-label-md font-label-md flex items-center gap-2 transition-all whitespace-nowrap ${
+                isActive
+                  ? 'font-semibold bg-primary-container text-on-primary-container shadow-sm'
+                  : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
+              }`
+            }
+          >
+            <span className="material-symbols-outlined text-base">database</span>
+            <span>Gestión de Catálogos</span>
+          </NavLink>
+        )}
       </nav>
 
       {/* Botón versión móvil para crear reto (Se oculta en Desktop) */}

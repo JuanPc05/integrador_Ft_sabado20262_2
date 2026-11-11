@@ -17,6 +17,7 @@ import { CrearRetoPage } from '@/features/retos/CrearRetoPage';
 import { DetalleRetoPage } from '@/features/retos/DetalleRetoPage';
 import { CrearEmpresaPage } from '@/features/empresas/CrearEmpresaPage';
 import { EmpresaDetallePage } from '@/features/empresas/EmpresaDetallePage';
+import { CatalogosAdminPage } from '@/features/admin/pages/CatalogosAdminPage';
 
 // Guardián de Rutas
 import { ProtectedRoute } from '@/core/ProtectedRoute';
@@ -64,6 +65,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardPage /> },
       { path: 'perfil', element: <PerfilPage /> },
+      { path: 'catalogos', element: <CatalogosAdminPage /> },
       { path: 'empresa/configuracion', element: <EmpresaDetallePage /> },
       { path: 'empresas/nueva', element: <CrearEmpresaPage /> },
       { path: 'empresas/:id', element: <EmpresaDetallePage /> },
