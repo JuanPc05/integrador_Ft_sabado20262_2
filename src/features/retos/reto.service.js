@@ -1,20 +1,21 @@
-// src/services/reto.service.js
-import { httpClient } from '@/core/httpClient';
+// src/features/retos/reto.service.js
+import { springApi } from '@/services/apiClient';
 
 const RETOS_BASE_PATH = '/api/retos';
 
 export const retoService = {
-  listar: () => httpClient.get(RETOS_BASE_PATH),
-  obtenerTodos: () => httpClient.get(RETOS_BASE_PATH),
-  obtenerPorId: (id) => httpClient.get(`${RETOS_BASE_PATH}/${id}`),
-  crear: (payload) => httpClient.post(RETOS_BASE_PATH, payload),
-  actualizar: (id, payload) => httpClient.put(`${RETOS_BASE_PATH}/${id}`, payload),
-  eliminar: (id) => httpClient.delete(`${RETOS_BASE_PATH}/${id}`),
-  listarCategorias: () => httpClient.get('/api/categorias'),
-  crearCategoria: (payload) => httpClient.post('/api/categorias', payload),
-  listarPrioridades: () => httpClient.get('/api/prioridades'),
-  crearPrioridad: (payload) => httpClient.post('/api/prioridades', payload),
+  listar: () => springApi.get(RETOS_BASE_PATH).then((r) => r.data),
+  obtenerTodos: () => springApi.get(RETOS_BASE_PATH).then((r) => r.data),
+  obtenerPorId: (id) => springApi.get(`${RETOS_BASE_PATH}/${id}`).then((r) => r.data),
+  crear: (payload) => springApi.post(RETOS_BASE_PATH, payload).then((r) => r.data),
+  actualizar: (id, payload) => springApi.put(`${RETOS_BASE_PATH}/${id}`, payload).then((r) => r.data),
+  actualizarEstado: (id, estadoActual) =>
+    springApi.patch(`${RETOS_BASE_PATH}/${id}/estado`, { estadoActual }).then((r) => r.data),
+  eliminar: (id) => springApi.delete(`${RETOS_BASE_PATH}/${id}`).then((r) => r.data),
+  listarCategorias: () => springApi.get('/api/categorias').then((r) => r.data),
+  crearCategoria: (payload) => springApi.post('/api/categorias', payload).then((r) => r.data),
+  listarPrioridades: () => springApi.get('/api/prioridades').then((r) => r.data),
+  crearPrioridad: (payload) => springApi.post('/api/prioridades', payload).then((r) => r.data),
 };
 
 export default retoService;
-

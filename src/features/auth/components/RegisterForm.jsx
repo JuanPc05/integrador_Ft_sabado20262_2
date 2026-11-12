@@ -1,8 +1,9 @@
 // src/features/auth/components/RegisterForm.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Icon } from '@/components/common';
 import { authService } from '@/features/auth/auth.service';
+import { springApi } from '@/services/apiClient';
 import InputField from './InputField';
 import PasswordField from './PasswordField';
 import SelectField from './SelectField';
@@ -38,13 +39,56 @@ function RegisterForm({ initialData = null, onSubmit }) {
       initialData?.rol ||
       initialData?.userRole ||
       '',
+    idEmpresa: initialData?.idEmpresa || initialData?.empresaId || '',
   });
+
+  const [empresas, setEmpresas] = useState([]);
+  const [loadingEmpresas, setLoadingEmpresas] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const esRolEmpresa =
+    (ROLE_MAP[values.userRole] || values.userRole) === 'REPRESENTANTE_EMPRESA';
+
+  // Cargar las empresas desde GET /api/empresas cuando el usuario selecciona el rol REPRESENTANTE_EMPRESA
+  useEffect(() => {
+    if (!esRolEmpresa || empresas.length > 0) return;
+
+    let isMounted = true;
+    setLoadingEmpresas(true);
+
+    springApi
+      .get('/api/empresas')
+      .then((response) => {
+        if (!isMounted) return;
+        const lista = Array.isArray(response.data) ? response.data : [];
+        setEmpresas(lista);
+      })
+      .catch(() => {
+        if (isMounted) setEmpresas([]);
+      })
+      .finally(() => {
+        if (isMounted) setLoadingEmpresas(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [esRolEmpresa, empresas.length]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setValues((prev) => ({ ...prev, [name]: value }));
+    setValues((prev) => {
+      const next = { ...prev, [name]: value };
+      // Si cambia a otro rol distinto de REPRESENTANTE_EMPRESA, limpiar idEmpresa
+      if (name === 'userRole') {
+        const normalizedRole = ROLE_MAP[value] || value;
+        if (normalizedRole !== 'REPRESENTANTE_EMPRESA') {
+          next.idEmpresa = '';
+        }
+      }
+      return next;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -52,12 +96,23 @@ function RegisterForm({ initialData = null, onSubmit }) {
     setLoading(true);
     setError('');
 
+    const rolNormalizado = ROLE_MAP[values.userRole] || values.userRole;
+
+    if (rolNormalizado === 'REPRESENTANTE_EMPRESA' && !values.idEmpresa) {
+      setError('Por favor selecciona la empresa a la que representas.');
+      setLoading(false);
+      return;
+    }
+
     const payload = {
       nombreCompleto: values.fullName.trim(),
       email: values.email.trim(),
       password: values.password,
-      rol: ROLE_MAP[values.userRole] || values.userRole,
-      idEmpresa: initialData?.idEmpresa ?? null,
+      rol: rolNormalizado,
+      idEmpresa:
+        rolNormalizado === 'REPRESENTANTE_EMPRESA' && values.idEmpresa
+          ? values.idEmpresa
+          : null,
       activo: initialData?.activo ?? true,
     };
 
@@ -146,13 +201,74 @@ function RegisterForm({ initialData = null, onSubmit }) {
         onChange={handleChange}
       />
 
+      {/* Bloque condicional exclusivo para el rol REPRESENTANTE_EMPRESA */}
+      {esRolEmpresa && (
+        <div className="space-y-2 rounded-2xl border border-primary-container/30 bg-surface-container/40 p-4 transition-all duration-200">
+          <label
+            className="block text-label-md font-label-md text-on-surface"
+            htmlFor="idEmpresa"
+          >
+            Organización / Empresa aliada{' '}
+            <span className="text-primary-container font-bold">*</span>
+          </label>
+          <div className="relative flex items-center">
+            <span className="absolute left-4 text-outline pointer-events-none flex items-center">
+              <Icon name="corporate_fare" className="text-[20px]" />
+            </span>
+            <select
+              id="idEmpresa"
+              name="idEmpresa"
+              required={esRolEmpresa}
+              disabled={loading || loadingEmpresas}
+              value={values.idEmpresa}
+              onChange={handleChange}
+              className="w-full appearance-none pl-11 pr-10 py-3 bg-[#12141C] border border-white/10 rounded-xl text-body-md font-body-md text-on-surface focus:border-primary-container focus:ring-2 focus:ring-primary-container/25 transition-all outline-none cursor-pointer"
+            >
+              <option className="bg-[#12141C] text-outline" value="" disabled>
+                {loadingEmpresas
+                  ? 'Cargando directorio de empresas...'
+                  : 'Selecciona tu empresa registrada'}
+              </option>
+              {empresas.map((emp) => (
+                <option
+                  key={emp.id}
+                  className="bg-[#12141C] text-on-surface"
+                  value={String(emp.id)}
+                >
+                  {emp.nombre} {emp.nit ? `— NIT: ${emp.nit}` : ''}
+                </option>
+              ))}
+            </select>
+            <span className="absolute right-4 text-outline pointer-events-none flex items-center">
+              <Icon name="expand_more" className="text-[20px]" />
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
+            <Link
+              to="/dashboard/empresas/nueva"
+              className="inline-flex items-center gap-1.5 text-caption font-caption text-primary hover:text-white hover:underline transition-colors"
+            >
+              <Icon name="add_business" className="text-[15px]" />
+              <span>¿No encuentras tu empresa? Solicita registrar una nueva</span>
+            </Link>
+          </div>
+        </div>
+      )}
+
       <div className="pt-3">
         <Button
           type="submit"
           variant="primary"
           className="w-full"
           disabled={loading}
-          iconRight={<Icon name={loading ? 'hourglass_top' : isEditMode ? 'save' : 'arrow_forward'} />}
+          iconRight={
+            <Icon
+              name={
+                loading ? 'hourglass_top' : isEditMode ? 'save' : 'arrow_forward'
+              }
+            />
+          }
         >
           {loading
             ? isEditMode
