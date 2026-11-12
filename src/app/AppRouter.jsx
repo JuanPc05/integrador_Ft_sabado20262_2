@@ -9,6 +9,7 @@ import { RetoLayout } from '@/core/RetoLayout';
 
 // Páginas
 import { LandingPage } from '@/features/landing/LandingPage';
+import { PublicChallengesPage } from '@/features/landing/PublicChallengesPage';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { RegisterPage } from '@/features/auth/Register';
 import { PerfilPage } from '@/features/auth/PerfilPage';
@@ -35,6 +36,8 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <LandingPage /> },
       { path: 'landing', element: <LandingPage /> },
+      { path: 'retos', element: <PublicChallengesPage /> },
+      { path: 'explorar', element: <PublicChallengesPage /> },
     ],
   },
 

@@ -51,10 +51,6 @@ export const ActiveChallengesSection = () => {
 
   useEffect(() => {
     let isMounted = true;
-    const token =
-      localStorage.getItem('token') || localStorage.getItem('accessToken');
-
-    if (!token) return;
 
     springApi
       .get('/api/retos')
@@ -96,7 +92,7 @@ export const ActiveChallengesSection = () => {
             Retos Destacados en la Plataforma
           </h2>
         </div>
-        <Link to="/dashboard">
+        <Link to="/retos">
           <Button
             variant="outline"
             size="sm"
@@ -137,13 +133,13 @@ export const ActiveChallengesSection = () => {
               <span className="text-caption text-outline">
                 CESDE Conecta 2026-2
               </span>
-              <Link to={`/dashboard/retos/${challenge.id}`}>
+              <Link to="/login">
                 <Button
                   variant="solid"
                   size="sm"
                   iconRight={<Icon name="arrow_forward" />}
                 >
-                  Ver detalle
+                  Postularse
                 </Button>
               </Link>
             </div>
