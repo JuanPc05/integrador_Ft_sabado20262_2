@@ -2,8 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/features/auth/useAuth";
-import { retoService } from "@/features/retos/reto.service";
-import { empresaService } from "@/features/empresas/empresa.service";
+import { springApi } from "@/services/apiClient";
 import { ChallengeBreadcrumb } from "./ChallengeBreadcrumb";
 import { CreateChallengeHeader } from "./CreateChallengeHeader";
 import { ChallengeGeneralSection } from "./ChallengeGeneralSection";
@@ -15,6 +14,50 @@ const UUID_REGEX =
 
 const isValidUuid = (value) =>
   typeof value === "string" && UUID_REGEX.test(value.trim());
+
+/**
+ * Extrae mensajes detallados cuando Spring Boot responde con Error 400 (MethodArgumentNotValidException)
+ * o con un ConflictoNegocioException / RecursoNoEncontradoException.
+ */
+const extractSpringErrorMessage = (err, fallbackMessage) => {
+  const errorData = err?.response?.data;
+  if (!errorData) {
+    return err?.message || fallbackMessage;
+  }
+
+  const validationContainer =
+    errorData.validationErrors || errorData.errors || errorData.errores;
+
+  if (validationContainer) {
+    if (Array.isArray(validationContainer) && validationContainer.length > 0) {
+      const msgs = validationContainer
+        .map((item) =>
+          typeof item === "string"
+            ? item
+            : item?.defaultMessage || item?.message || item?.mensaje
+        )
+        .filter(Boolean);
+      if (msgs.length > 0) return msgs.join(" ");
+    }
+
+    if (
+      typeof validationContainer === "object" &&
+      !Array.isArray(validationContainer)
+    ) {
+      const msgs = Object.values(validationContainer).filter(
+        (val) => typeof val === "string" && val.trim().length > 0
+      );
+      if (msgs.length > 0) return msgs.join(" ");
+    }
+  }
+
+  return (
+    errorData.message ||
+    errorData.mensaje ||
+    errorData.error ||
+    fallbackMessage
+  );
+};
 
 export const CreateChallengeForm = ({ onSubmitChallenge, onCancel }) => {
   const navigate = useNavigate();
@@ -36,7 +79,7 @@ export const CreateChallengeForm = ({ onSubmitChallenge, onCancel }) => {
     fechaInicio: "",
     fechaFin: "",
     fechaLimite: "",
-    estadoActual: "RADICADO",
+    estadoActual: "EN_CONVOCATORIA",
   });
   const [empresas, setEmpresas] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -45,22 +88,37 @@ export const CreateChallengeForm = ({ onSubmitChallenge, onCancel }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // 1. Cargar los catálogos desde Spring Boot usando `springApi` (con Interceptor JWT)
   useEffect(() => {
     let isMounted = true;
 
     const cargarCatalogos = async () => {
       try {
         const [empresasRes, categoriasRes, prioridadesRes] = await Promise.all([
-          empresaService.listar().catch(() => []),
-          retoService.listarCategorias().catch(() => []),
-          retoService.listarPrioridades().catch(() => []),
+          springApi.get("/api/empresas").then((r) => r.data).catch(() => []),
+          springApi.get("/api/categorias").then((r) => r.data).catch(() => []),
+          springApi.get("/api/prioridades").then((r) => r.data).catch(() => []),
         ]);
 
         if (!isMounted) return;
 
-        if (Array.isArray(empresasRes)) setEmpresas(empresasRes);
-        if (Array.isArray(categoriasRes)) setCategorias(categoriasRes);
-        if (Array.isArray(prioridadesRes)) setPrioridades(prioridadesRes);
+        const listaEmpresas = Array.isArray(empresasRes) ? empresasRes : [];
+        const listaCategorias = Array.isArray(categoriasRes) ? categoriasRes : [];
+        const listaPrioridades = Array.isArray(prioridadesRes) ? prioridadesRes : [];
+
+        setEmpresas(listaEmpresas);
+        setCategorias(listaCategorias);
+        setPrioridades(listaPrioridades);
+
+        // Si el usuario aún no tiene empresa seleccionada pero hay empresas disponibles, preseleccionar la del usuario o la primera
+        setFormData((prev) => ({
+          ...prev,
+          empresaId:
+            prev.empresaId ||
+            (isValidUuid(userEmpresaUuid)
+              ? userEmpresaUuid
+              : listaEmpresas[0]?.id || ""),
+        }));
       } catch {
         // Error silencioso al cargar catálogos iniciales
       }
@@ -71,9 +129,9 @@ export const CreateChallengeForm = ({ onSubmitChallenge, onCancel }) => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [userEmpresaUuid]);
 
-  // Efecto para cargar los datos del reto cuando estamos en modo Edición (editId presente)
+  // 2. Cargar los datos del reto cuando estamos en modo Edición (`?edit=<UUID>`)
   useEffect(() => {
     if (!editId) return;
 
@@ -81,13 +139,14 @@ export const CreateChallengeForm = ({ onSubmitChallenge, onCancel }) => {
 
     const cargarRetoParaEdicion = async () => {
       try {
-        const data = await retoService.obtenerPorId(editId);
+        const { data } = await springApi.get(`/api/retos/${editId}`);
         if (!isMounted || !data) return;
 
         setFormData({
           nombre: data.nombre || data.titulo || "",
           descripcion: data.descripcion || "",
-          empresaId: data.idEmpresa || data.empresa?.id || userEmpresaUuid || "",
+          empresaId:
+            data.idEmpresa || data.empresa?.id || userEmpresaUuid || "",
           categoria: data.idCategoria || data.categoria?.id || "",
           prioridad: data.idPrioridad || data.prioridad?.id || "",
           fechaInicio: data.fechaInicio ? data.fechaInicio.slice(0, 10) : "",
@@ -95,12 +154,15 @@ export const CreateChallengeForm = ({ onSubmitChallenge, onCancel }) => {
           fechaLimite: data.fechaLimiteRpta
             ? data.fechaLimiteRpta.slice(0, 16)
             : "",
-          estadoActual: data.estadoActual || "RADICADO",
+          estadoActual: data.estadoActual || "EN_CONVOCATORIA",
         });
       } catch (err) {
         if (!isMounted) return;
         setError(
-          err?.message || "No fue posible cargar la información del reto a editar."
+          extractSpringErrorMessage(
+            err,
+            "No fue posible cargar la información del reto a editar."
+          )
         );
       } finally {
         if (isMounted) {
@@ -116,7 +178,7 @@ export const CreateChallengeForm = ({ onSubmitChallenge, onCancel }) => {
     };
   }, [editId, userEmpresaUuid]);
 
-  // Función genérica para actualizar cualquier campo del formulario
+  // Manejador genérico de cambios de inputs y selects
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -125,28 +187,53 @@ export const CreateChallengeForm = ({ onSubmitChallenge, onCancel }) => {
     }));
   };
 
-  // Manejador del envío del formulario hacia el backend (POST / PUT)
+  // 3. Envío del formulario hacia Spring Boot (`POST /api/retos` o `PUT /api/retos/{id}`)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    // Armar el payload alineado con RetoRequestDTO de Spring Boot
-    const fechaLimiteNormalizada =
-      formData.fechaLimite && formData.fechaLimite.length === 16
-        ? `${formData.fechaLimite}:00`
-        : formData.fechaLimite;
+    // Normalizar `fechaLimiteRpta` al formato ISO LocalDateTime exigido por Java (YYYY-MM-DDTHH:mm:ss)
+    let fechaLimiteNormalizada = formData.fechaLimite;
+    if (fechaLimiteNormalizada && fechaLimiteNormalizada.length === 16) {
+      fechaLimiteNormalizada = `${fechaLimiteNormalizada}:00`;
+    } else if (!fechaLimiteNormalizada && formData.fechaFin) {
+      fechaLimiteNormalizada = `${formData.fechaFin}T23:59:00`;
+    }
 
+    const esRepresentante = user?.rol === "REPRESENTANTE_EMPRESA";
+    const idEmpresaFinal = String(
+      esRepresentante
+        ? userEmpresaUuid || formData.empresaId || ""
+        : formData.empresaId || userEmpresaUuid || ""
+    ).trim();
+    const idCategoriaFinal = (formData.categoria || "").trim();
+    const idPrioridadFinal = (formData.prioridad || "").trim();
+
+    // Validación preventiva en cliente antes de disparar la petición HTTP
+    if (
+      !isValidUuid(idEmpresaFinal) ||
+      !isValidUuid(idCategoriaFinal) ||
+      !isValidUuid(idPrioridadFinal)
+    ) {
+      setError(
+        "Debes seleccionar una Empresa, Categoría Técnica y Prioridad válidas antes de publicar el reto."
+      );
+      setLoading(false);
+      return;
+    }
+
+    // Payload sincronizado 1 a 1 con `RetoRequestDTO.java`
     const payload = {
       nombre: formData.nombre.trim(),
       descripcion: formData.descripcion.trim(),
       fechaInicio: formData.fechaInicio,
       fechaFin: formData.fechaFin,
       fechaLimiteRpta: fechaLimiteNormalizada,
-      idEmpresa: formData.empresaId || userEmpresaUuid,
-      idCategoria: formData.categoria,
-      idPrioridad: formData.prioridad,
-      estadoActual: formData.estadoActual || "RADICADO",
+      idEmpresa: idEmpresaFinal,
+      idCategoria: idCategoriaFinal,
+      idPrioridad: idPrioridadFinal,
+      estadoActual: formData.estadoActual || "EN_CONVOCATORIA",
     };
 
     try {
@@ -156,19 +243,20 @@ export const CreateChallengeForm = ({ onSubmitChallenge, onCancel }) => {
       }
 
       if (isEditMode) {
-        await retoService.actualizar(editId, payload);
+        await springApi.put(`/api/retos/${editId}`, payload);
         navigate(`/dashboard/retos/${editId}`);
       } else {
-        await retoService.crear(payload);
+        await springApi.post("/api/retos", payload);
         navigate("/dashboard");
       }
     } catch (err) {
-      setError(
-        err?.message ||
-          (isEditMode
-            ? "No fue posible actualizar el reto. Verifica los datos e intenta nuevamente."
-            : "No fue posible publicar el reto. Verifica los datos e intenta nuevamente.")
+      const mensajeError = extractSpringErrorMessage(
+        err,
+        isEditMode
+          ? "No fue posible actualizar el reto. Verifica los datos e intenta nuevamente."
+          : "No fue posible publicar el reto. Verifica los datos e intenta nuevamente."
       );
+      setError(mensajeError);
     } finally {
       setLoading(false);
     }
@@ -176,19 +264,18 @@ export const CreateChallengeForm = ({ onSubmitChallenge, onCancel }) => {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      {/* 1. Migas de pan (Fuera de la tarjeta) */}
+      {/* 1. Migas de pan */}
       <ChallengeBreadcrumb />
 
       {/* 2. Tarjeta Principal del Formulario */}
       <div className="bg-surface-container rounded-3xl p-6 sm:p-10 md:p-12 shadow-2xl shadow-black/80 backdrop-blur-xl relative overflow-hidden border border-white/5">
-        
         {/* Línea superior de brillo decorativo */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary-container to-transparent opacity-80" />
 
         {/* 3. Encabezado de la Tarjeta */}
         <CreateChallengeHeader isEditMode={isEditMode} />
 
-        {/* Banner de Alerta de Error */}
+        {/* Banner de Alerta de Error (Validaciones 400 Bad Request / Negocio) */}
         {error && (
           <div
             role="alert"
@@ -214,20 +301,20 @@ export const CreateChallengeForm = ({ onSubmitChallenge, onCancel }) => {
         ) : (
           /* 4. El Formulario con sus 3 Secciones y Acciones */
           <form className="space-y-10" onSubmit={handleSubmit}>
-            
             {/* A. Sección de Información General */}
             <ChallengeGeneralSection
               formData={formData}
               onChange={handleChange}
             />
 
-            {/* B. Sección de Mapeo y Clasificación */}
+            {/* B. Sección de Mapeo, Clasificación y Estado */}
             <ChallengeClassificationSection
               formData={formData}
               onChange={handleChange}
               empresas={empresas}
               categorias={categorias}
               prioridades={prioridades}
+              user={user}
             />
 
             {/* C. Sección de Cronograma y Fechas Límite */}

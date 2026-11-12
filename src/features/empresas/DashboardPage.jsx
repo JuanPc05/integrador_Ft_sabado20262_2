@@ -1,7 +1,6 @@
 // src/features/empresas/DashboardPage.jsx
 import { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '@/features/auth/useAuth';
-import { retoService } from '@/features/retos/reto.service';
+import { springApi } from '@/services/apiClient';
 import { SubNavigation } from '@/features/empresas/components/dashboard/SubNavigation';
 import { KpiCard } from '@/features/empresas/components/dashboard/KpiCard';
 import { ChallengeTable } from '@/features/empresas/components/dashboard/ChallengeTable';
@@ -10,7 +9,6 @@ import { SupportBanner } from '@/features/empresas/components/dashboard/SupportB
 import { NextSessionCard } from '@/features/empresas/components/dashboard/NextSessionCard';
 
 export const DashboardMainPage = () => {
-  const { user } = useAuth();
   const [retos, setRetos] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,24 +18,25 @@ export const DashboardMainPage = () => {
     const cargarRetos = async () => {
       setLoading(true);
       try {
-        const data = await retoService.obtenerTodos();
-        const listaRetos = Array.isArray(data) ? data : [];
+        // Petición directa con springApi (Axios con interceptor JWT) hacia GET /api/retos
+        const response = await springApi.get('/api/retos');
 
-        let retosFiltrados = listaRetos;
-
-        if (user?.rol === 'ADMIN_UNIVERSIDAD') {
-          retosFiltrados = listaRetos;
-        } else if (user?.rol === 'REPRESENTANTE_EMPRESA') {
-          const userEmpresaId = user?.idEmpresa || user?.empresaId || user?.empresa?.id;
-          retosFiltrados = listaRetos.filter(
-            (reto) => reto.idEmpresa === userEmpresaId
-          );
-        }
+        // Soporta arreglo directo [{ id, nombre, ... }] (y fallback defensivo si algún día se pagina)
+        const payload = response.data;
+        const listaRetos = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.content)
+            ? payload.content
+            : Array.isArray(payload?.data)
+              ? payload.data
+              : [];
 
         if (isMounted) {
-          setRetos(retosFiltrados);
+          // Renderiza siempre el listado completo de retos recibidos desde Spring Boot
+          setRetos(listaRetos);
         }
-      } catch {
+      } catch (err) {
+        console.error('[Dashboard] Error al obtener retos desde /api/retos:', err);
         if (isMounted) {
           setRetos([]);
         }
@@ -53,13 +52,13 @@ export const DashboardMainPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [user?.rol, user?.idEmpresa, user?.empresaId, user?.empresa?.id]);
+  }, []);
 
-  // Cálculos derivados memorizados con useMemo a partir de los retos en estado
+  // Cálculos derivados memorizados con useMemo a partir de todos los estados del enum EstadoReto
   const retosActivos = useMemo(
     () =>
       retos.filter((r) => {
-        const estado = r.estado || r.estadoActual;
+        const estado = r.estadoActual || r.estado;
         return (
           estado === 'EN_CONVOCATORIA' ||
           estado === 'RADICADO' ||
@@ -72,7 +71,7 @@ export const DashboardMainPage = () => {
   const proyectosDesarrollo = useMemo(
     () =>
       retos.filter((r) => {
-        const estado = r.estado || r.estadoActual;
+        const estado = r.estadoActual || r.estado;
         return estado === 'EN_DESARROLLO' || estado === 'ASIGNADO';
       }).length,
     [retos]
@@ -81,7 +80,7 @@ export const DashboardMainPage = () => {
   const retosFinalizados = useMemo(
     () =>
       retos.filter((r) => {
-        const estado = r.estado || r.estadoActual;
+        const estado = r.estadoActual || r.estado;
         return estado === 'FINALIZADO' || estado === 'RESUELTO';
       }).length,
     [retos]
@@ -96,7 +95,7 @@ export const DashboardMainPage = () => {
             ? r.equipos.length
             : Array.isArray(r.assignedGroups)
               ? r.assignedGroups.length
-              : 0),
+              : 1),
         0
       ),
     [retos]
@@ -112,32 +111,60 @@ export const DashboardMainPage = () => {
 
   // Arreglo de datos para iterar los KPIs dinámicamente
   const kpiData = [
-    { 
-      id: 1, title: "Total Retos Activos", icon: "flag", value: String(retosActivos), 
-      trendIcon: "trending_up", trendText: `${retos.length} registrados`, subtitle: "Convocatorias simultáneas", 
-      colorClass: "text-primary", bgClass: "bg-primary-container/10", hoverClass: "hover:border-primary-container/30" 
+    {
+      id: 1,
+      title: 'Total Retos Activos',
+      icon: 'flag',
+      value: String(retosActivos),
+      trendIcon: 'trending_up',
+      trendText: `${retos.length} registrados`,
+      subtitle: 'Convocatorias simultáneas',
+      colorClass: 'text-primary',
+      bgClass: 'bg-primary-container/10',
+      hoverClass: 'hover:border-primary-container/30',
     },
-    { 
-      id: 2, title: "Equipos Postulados", icon: "group_work", value: String(equiposPostulados), 
-      trendIcon: "bolt", trendText: `${equiposPostulados * 4} estudiantes`, subtitle: "Talento evaluando desafíos", 
-      colorClass: "text-tertiary", bgClass: "bg-tertiary-container/20", hoverClass: "hover:border-tertiary/30" 
+    {
+      id: 2,
+      title: 'Equipos Postulados',
+      icon: 'group_work',
+      value: String(equiposPostulados),
+      trendIcon: 'bolt',
+      trendText: `${equiposPostulados * 4} estudiantes`,
+      subtitle: 'Talento evaluando desafíos',
+      colorClass: 'text-tertiary',
+      bgClass: 'bg-tertiary-container/20',
+      hoverClass: 'hover:border-tertiary/30',
     },
-    { 
-      id: 3, title: "Proyectos en Desarrollo", icon: "pending_actions", value: String(proyectosDesarrollo), 
-      trendIcon: "", trendText: "En ejecución", subtitle: "Con acompañamiento docente", 
-      colorClass: "text-secondary", bgClass: "bg-secondary-container/30", hoverClass: "hover:border-secondary/30" 
+    {
+      id: 3,
+      title: 'Proyectos en Desarrollo',
+      icon: 'pending_actions',
+      value: String(proyectosDesarrollo),
+      trendIcon: '',
+      trendText: 'En ejecución',
+      subtitle: 'Con acompañamiento docente',
+      colorClass: 'text-secondary',
+      bgClass: 'bg-secondary-container/30',
+      hoverClass: 'hover:border-secondary/30',
     },
-    { 
-      id: 4, title: "Tasa de Éxito", icon: "verified_user", value: `${tasaExito}%`, 
-      trendIcon: "check_circle", trendText: `${retosFinalizados} completados`, subtitle: "Cumplimiento metodológico", 
-      colorClass: "text-primary-fixed", bgClass: "bg-surface-container-high", hoverClass: "hover:border-primary-container/30" 
-    }
+    {
+      id: 4,
+      title: 'Tasa de Éxito',
+      icon: 'verified_user',
+      value: `${tasaExito}%`,
+      trendIcon: 'check_circle',
+      trendText: `${retosFinalizados} completados`,
+      subtitle: 'Cumplimiento metodológico',
+      colorClass: 'text-primary-fixed',
+      bgClass: 'bg-surface-container-high',
+      hoverClass: 'hover:border-primary-container/30',
+    },
   ];
 
   return (
     <>
       <SubNavigation />
-      
+
       {/* Renderizado dinámico de KPIs */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpiData.map((kpi) => (
@@ -147,19 +174,17 @@ export const DashboardMainPage = () => {
 
       {/* Estructura de columnas (8 para la tabla, 4 para el chat) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
         {/* Columna Izquierda */}
         <section className="lg:col-span-8 flex flex-col gap-6">
           <ChallengeTable retos={retos} loading={loading} />
           <SupportBanner />
         </section>
-        
+
         {/* Columna Derecha */}
         <section className="lg:col-span-4 flex flex-col gap-4">
           <FeedbackDrawer />
           <NextSessionCard />
         </section>
-        
       </div>
     </>
   );

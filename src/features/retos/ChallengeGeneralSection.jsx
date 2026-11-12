@@ -26,7 +26,7 @@ export const ChallengeGeneralSection = ({ formData = {}, onChange }) => {
             <span className="text-primary-container font-bold">*</span>
           </span>
           <span className="font-caption text-caption text-outline">
-            Máx. 120 caracteres
+            Máx. 100 caracteres
           </span>
         </label>
         <div className="relative">
@@ -39,7 +39,7 @@ export const ChallengeGeneralSection = ({ formData = {}, onChange }) => {
             className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-surface-container-lowest text-on-surface placeholder:text-outline/70 focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 font-body-md text-body-md transition-all duration-200"
             id="reto-nombre"
             name="nombre"
-            maxLength={120}
+            maxLength={100}
             placeholder="Ej. Desarrollo de Algoritmo de Ruteo Inteligente en Tiempo Real"
             required
             type="text"

@@ -9,6 +9,7 @@ import { RetoLayout } from '@/core/RetoLayout';
 
 // Páginas
 import { LandingPage } from '@/features/landing/LandingPage';
+import { PublicChallengesPage } from '@/features/landing/PublicChallengesPage';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { RegisterPage } from '@/features/auth/Register';
 import { PerfilPage } from '@/features/auth/PerfilPage';
@@ -18,6 +19,7 @@ import { DetalleRetoPage } from '@/features/retos/DetalleRetoPage';
 import { CrearEmpresaPage } from '@/features/empresas/CrearEmpresaPage';
 import { EmpresaDetallePage } from '@/features/empresas/EmpresaDetallePage';
 import { CatalogosAdminPage } from '@/features/admin/pages/CatalogosAdminPage';
+import { Dashboard as AnalyticsDashboardPage } from '@/features/admin/pages/Dashboard';
 
 // Guardián de Rutas
 import { ProtectedRoute } from '@/core/ProtectedRoute';
@@ -34,6 +36,8 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <LandingPage /> },
       { path: 'landing', element: <LandingPage /> },
+      { path: 'retos', element: <PublicChallengesPage /> },
+      { path: 'explorar', element: <PublicChallengesPage /> },
     ],
   },
 
@@ -66,6 +70,7 @@ export const router = createBrowserRouter([
       { index: true, element: <DashboardPage /> },
       { path: 'perfil', element: <PerfilPage /> },
       { path: 'catalogos', element: <CatalogosAdminPage /> },
+      { path: 'analytics', element: <AnalyticsDashboardPage /> },
       { path: 'empresa/configuracion', element: <EmpresaDetallePage /> },
       { path: 'empresas/nueva', element: <CrearEmpresaPage /> },
       { path: 'empresas/:id', element: <EmpresaDetallePage /> },
