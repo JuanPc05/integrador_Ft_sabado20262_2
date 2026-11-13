@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/features/auth/useAuth';
+import { SideMenu } from '@/features/empresas/components/dashboard/SideMenu';
+import { NotificationBell } from '@/features/empresas/components/dashboard/NotificationBell';
 
 const getPortalLabel = (rol) => {
   if (rol === 'ESTUDIANTE') return 'Portal estudiantes';
@@ -12,6 +14,7 @@ const getPortalLabel = (rol) => {
 export const Header = () => {
   const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
 
   const isCesdeRole =
     user?.rol === 'ADMIN_UNIVERSIDAD' || user?.rol === 'ESTUDIANTE';
@@ -29,9 +32,18 @@ export const Header = () => {
   return (
     <header className="bg-surface/80 backdrop-blur-md sticky top-0 z-50 shadow-lg shadow-black/40">
       <div className="flex justify-between items-center w-full px-6 md:px-12 max-w-7xl mx-auto h-20">
-        
-        {/* Logo Branding */}
-        <div className="flex items-center gap-4">
+
+        {/* Menú hamburguesa + Logo Branding */}
+        <div className="flex items-center gap-3 sm:gap-4">
+          <button
+            type="button"
+            onClick={() => setIsSideMenuOpen(true)}
+            aria-label="Abrir menú"
+            className="p-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface transition-all duration-150 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-xl">menu</span>
+          </button>
+
           <Link className="flex items-center gap-3 group" to="/dashboard">
             <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center shadow-lg shadow-primary-container/20 group-hover:scale-105 transition-transform duration-200">
               <span className="font-headline-md font-extrabold text-on-primary-container tracking-tighter text-sm">CESDE</span>
@@ -51,9 +63,9 @@ export const Header = () => {
             <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
               <span className="material-symbols-outlined text-lg">search</span>
             </span>
-            <input 
-              className="w-full pl-10 pr-4 py-2 bg-surface-container-low rounded-xl border border-white/10 text-on-surface placeholder:text-outline text-body-sm font-body-sm focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" 
-              placeholder="Buscar retos, talentos, entregables..." 
+            <input
+              className="w-full pl-10 pr-4 py-2 bg-surface-container-low rounded-xl border border-white/10 text-on-surface placeholder:text-outline text-body-sm font-body-sm focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
+              placeholder="Buscar retos, talentos, entregables..."
               type="text"
             />
           </div>
@@ -61,13 +73,7 @@ export const Header = () => {
 
         {/* Acciones de Cabecera y Perfil */}
         <div className="flex items-center gap-4">
-          
-          {/* Botón Notificaciones */}
-          <button className="relative p-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface transition-all duration-150">
-            <span className="material-symbols-outlined text-xl">notifications</span>
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary-container rounded-full ring-2 ring-surface"></span>
-          </button>
-          
+
           {/* CTA Principal protegido por RBAC */}
           {(user?.rol === 'ADMIN_UNIVERSIDAD' || user?.rol === 'REPRESENTANTE_EMPRESA') && (
             <Link
@@ -78,9 +84,9 @@ export const Header = () => {
               <span>Publicar Nuevo Reto</span>
             </Link>
           )}
-          
+
           <div className="h-8 w-px bg-surface-variant/40 hidden sm:block"></div>
-          
+
           {/* Perfil Usuario / Organización + Dropdown */}
           <div className="relative">
             <button
@@ -138,9 +144,13 @@ export const Header = () => {
               </div>
             )}
           </div>
-          
+
+          {/* Notificaciones: esquina derecha */}
+          <NotificationBell />
         </div>
       </div>
+
+      <SideMenu open={isSideMenuOpen} onClose={() => setIsSideMenuOpen(false)} />
     </header>
   );
 };
