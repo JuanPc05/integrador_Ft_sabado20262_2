@@ -37,13 +37,13 @@ const STEPS = [
 // 2. Componente de Presentación (La Tarjeta)
 // Nota cómo resolvemos el style en línea de font-variation-settings
 const StepCard = ({ step }) => (
-  <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group hover:-translate-y-1">
+  <div className="bg-surface-container rounded-3xl p-8 border border-white/10 shadow-sm hover:shadow-xl hover:shadow-black/40 hover:border-primary-container/30 transition-all duration-300 flex flex-col justify-between group hover:-translate-y-1">
     <div>
       <div className="flex items-center justify-between mb-6">
-        <span className="text-display-hero-mobile font-display-hero-mobile text-[#E11D74]/20 font-black group-hover:text-[#E11D74] transition-colors">
+        <span className="text-display-hero-mobile font-display-hero-mobile text-primary/20 font-black group-hover:text-primary transition-colors">
           {step.id}
         </span>
-        <div className="w-12 h-12 rounded-2xl bg-pink-50 text-[#D91671] flex items-center justify-center border border-pink-100">
+        <div className="w-12 h-12 rounded-2xl bg-primary-container/10 text-primary flex items-center justify-center border border-primary-container/20">
           <span 
             className="material-symbols-outlined" 
             style={{ fontVariationSettings: "'FILL' 1" }}
@@ -52,14 +52,14 @@ const StepCard = ({ step }) => (
           </span>
         </div>
       </div>
-      <h3 className="text-headline-sm font-headline-sm text-[#0F172A] mb-3 group-hover:text-[#D91671] transition-colors">
+      <h3 className="text-headline-sm font-headline-sm text-on-surface mb-3 group-hover:text-primary transition-colors">
         {step.title}
       </h3>
-      <p className="text-body-sm font-body-sm text-[#64748B] leading-relaxed">
+      <p className="text-body-sm font-body-sm text-on-surface-variant leading-relaxed">
         {step.description}
       </p>
     </div>
-    <div className="pt-6 mt-6 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-[#D91671]">
+    <div className="pt-6 mt-6 border-t border-white/5 flex items-center gap-2 text-xs font-semibold text-primary">
       <span>{step.pillText}</span>
       <span className="material-symbols-outlined text-xs">{step.pillIcon}</span>
     </div>
@@ -69,21 +69,21 @@ const StepCard = ({ step }) => (
 // 3. El Contenedor de la Sección
 export const HowItWorksSection = () => {
   return (
-    <section className="bg-[#F8FAFC] text-[#0F172A] py-24 px-6 md:px-12 transition-colors relative z-20" id="como-funciona">
+    <section className="bg-surface-container-low/70 text-on-surface py-16 md:py-20 px-6 md:px-12 rounded-3xl border border-white/5 transition-colors relative z-20 scroll-mt-28" id="como-funciona">
       <div className="max-w-7xl mx-auto">
         
         {/* Header de la sección */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
           <div className="max-w-2xl space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-100 text-[#D91671] font-semibold text-xs tracking-wider uppercase">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-container/15 text-primary font-semibold text-xs tracking-wider uppercase">
               <span className="material-symbols-outlined text-xs">sync_alt</span>
               Metodología Ágil Integrada
             </div>
-            <h2 className="text-headline-xl md:text-display-hero-mobile font-headline-xl md:font-display-hero-mobile text-[#0F172A] tracking-tight">
+            <h2 className="text-headline-xl md:text-display-hero-mobile font-headline-xl md:font-display-hero-mobile text-on-surface tracking-tight">
               Un proceso simple para transformar ideas en proyectos reales
             </h2>
           </div>
-          <p className="text-body-md font-body-md text-[#475569] max-w-md">
+          <p className="text-body-md font-body-md text-on-surface-variant max-w-md">
             Conectamos los requerimientos técnicos y productivos de tu empresa con las competencias prácticas de nuestros estudiantes y la mentoría docente especializada.
           </p>
         </div>
@@ -96,18 +96,18 @@ export const HowItWorksSection = () => {
         </div>
 
         {/* Quick Action Under Process */}
-        <div className="mt-14 p-8 rounded-3xl bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="mt-14 p-8 rounded-3xl bg-surface-container-lowest border border-white/5 text-white flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-[#E11D74] flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-white">tips_and_updates</span>
             </div>
             <div>
               <h4 className="text-headline-sm font-headline-sm text-white">¿Tienes dudas sobre cómo estructurar el reto de tu empresa?</h4>
-              <p className="text-body-sm font-body-sm text-slate-300">Nuestros coordinadores académicos te asesoran sin costo para definir el alcance ideal.</p>
+              <p className="text-body-sm font-body-sm text-on-surface-variant">Nuestros coordinadores académicos te asesoran sin costo para definir el alcance ideal.</p>
             </div>
           </div>
-          <a className="brand-btn-gradient text-white font-label-md px-6 py-3 rounded-xl whitespace-nowrap shadow hover:opacity-95 transition-all" href="#contacto-asesoria">
-            Agendar asesoría gratuita
+          <a className="brand-btn-gradient text-white font-label-md px-6 py-3 rounded-xl whitespace-nowrap shadow hover:opacity-95 transition-all" href="mailto:admin.conecta@cesde.edu.co?subject=Asesor%C3%ADa%20para%20mi%20reto">
+            Solicitar asesoría gratuita
           </a>
         </div>
       </div>
