@@ -5,3 +5,4 @@ export * from './HeroSection';
 export * from './HowItWorksSection';
 export * from './LandingAnalyticsSection';
 export * from './TestimonialsSection';
+export * from './RolesSection';

@@ -83,8 +83,7 @@ export function LoginForm({ onSuccess }) {
             Contraseña
           </label>
           <a
-            href="#recuperar"
-            className="text-xs font-medium text-primary hover:text-primary-container transition-colors"
+            href="mailto:admin.conecta@cesde.edu.co?subject=Recuperar%20contrase%C3%B1a%20CESDE%20Conecta"
           >
             ¿Olvidaste tu contraseña?
           </a>
