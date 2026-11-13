@@ -1,7 +1,6 @@
 // src/features/empresas/DashboardPage.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { springApi } from '@/services/apiClient';
-import { SubNavigation } from '@/features/empresas/components/dashboard/SubNavigation';
 import { KpiCard } from '@/features/empresas/components/dashboard/KpiCard';
 import { ChallengeTable } from '@/features/empresas/components/dashboard/ChallengeTable';
 import { FeedbackDrawer } from '@/features/empresas/components/dashboard/FeedbackDrawer';
@@ -163,10 +162,8 @@ export const DashboardMainPage = () => {
 
   return (
     <>
-      <SubNavigation />
-
       {/* Renderizado dinámico de KPIs */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <section id="equipos" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 scroll-mt-28">
         {kpiData.map((kpi) => (
           <KpiCard key={kpi.id} {...kpi} />
         ))}
@@ -176,13 +173,17 @@ export const DashboardMainPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Columna Izquierda */}
         <section className="lg:col-span-8 flex flex-col gap-6">
-          <ChallengeTable retos={retos} loading={loading} />
+          <div id="mis-retos" className="scroll-mt-28">
+            <ChallengeTable retos={retos} loading={loading} />
+          </div>
           <SupportBanner />
         </section>
 
         {/* Columna Derecha */}
         <section className="lg:col-span-4 flex flex-col gap-4">
-          <FeedbackDrawer />
+          <div id="mensajes" className="scroll-mt-28">
+            <FeedbackDrawer />
+          </div>
           <NextSessionCard />
         </section>
       </div>
