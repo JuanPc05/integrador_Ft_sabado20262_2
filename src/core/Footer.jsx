@@ -1,20 +1,40 @@
+// src/core/Footer.jsx
+import { Link } from 'react-router-dom';
 import { Icon } from '@/components/common';
 
 const LOGO_URL =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuDJbHjXOTu1nj0mpdPrX9kG4UheDAYzeieAyfHS-gDCwnofSt6TOgHgkPAcXbSoYSzqaTrI_d8U7OOlCnSZOpp48lR6CnWNJVSDM3t0JPIJgPWuI9urf5pIoFaOQZH6fTri722ETuS2KaCc_Vj2cr2yGrBno4ZXw_d72QTAebVFohv7zxiYKg-PeHNVDTDm49MApVLXOmKaMr3uUw1EXNY2i-W06wwq5Dd0EYTXkfiqkDUaRIwDNyHbGApViNuHXi1M9tY';
 
+const CORREO = 'admin.conecta@cesde.edu.co';
+
+// `to` = ruta interna · `href` = enlace externo o mailto · sin ninguno = pendiente (#)
 const COLUMNS = [
   {
     title: 'Plataforma',
-    links: ['Cómo funciona', 'Explorar Retos', 'Para Empresas', 'Para Estudiantes'],
+    links: [
+      { label: 'Cómo funciona', to: '/#como-funciona' },
+      { label: 'Explorar Retos', to: '/retos' },
+      { label: 'Para Empresas', to: '/registro' },
+      { label: 'Para Estudiantes', to: '/registro' },
+    ],
   },
   {
     title: 'Ecosistema',
-    links: ['Casos de Éxito', 'Mentores & Docentes', 'Alianzas CESDE', 'Comunidad Digital'],
+    links: [
+      { label: 'Casos de Éxito', to: '/#testimonios' },
+      { label: 'Mentores & Docentes', to: '/#roles' },
+      { label: 'Alianzas CESDE', href: 'https://www.cesde.edu.co', external: true },
+      { label: 'Comunidad Digital', to: '/#testimonios' },
+    ],
   },
   {
     title: 'Legal & Soporte',
-    links: ['Términos de servicio', 'Política de privacidad', 'Preguntas frecuentes', 'Contacto'],
+    links: [
+      { label: 'Términos de servicio' },
+      { label: 'Política de privacidad' },
+      { label: 'Preguntas frecuentes' },
+      { label: 'Contacto', href: `mailto:${CORREO}` },
+    ],
   },
 ];
 
@@ -65,10 +85,20 @@ export function Footer() {
               </h4>
               <ul className="flex flex-col gap-2 text-body-sm font-body-sm text-on-surface-variant">
                 {col.links.map((link) => (
-                  <li key={link}>
-                    <a className="hover:text-primary transition-colors duration-200" href="#">
-                      {link}
-                    </a>
+                  <li key={link.label}>
+                    {link.to ? (
+                      <Link className="hover:text-primary transition-colors duration-200" to={link.to}>
+                        {link.label}
+                      </Link>
+                    ) : (
+                      <a
+                        className="hover:text-primary transition-colors duration-200"
+                        href={link.href || '#'}
+                        {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      >
+                        {link.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>

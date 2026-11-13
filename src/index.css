@@ -3,51 +3,51 @@
 /* paleta, tipografias y tamanos tomados del diseno de CESDE Conecta */
 @theme {
   /* colores */
-  --color-surface-dim: #121318;
+  --color-surface-dim: #13111a;
   --color-on-secondary-fixed: #2b0052;
-  --color-surface: #121318;
+  --color-surface: #13111a;
   --color-surface-tint: #ffb1c5;
   --color-on-error-container: #ffdad6;
   --color-on-tertiary-container: #ffffff;
   --color-primary-container: #e11d74;
   --color-inverse-on-surface: #2f3036;
-  --color-outline: #a98890;
+  --color-outline: #a58fa0;
   --color-on-error: #690005;
   --color-tertiary-fixed: #7df4ff;
-  --color-on-surface-variant: #e2bdc5;
+  --color-on-surface-variant: #d8c4d2;
   --color-secondary-fixed-dim: #dbb8ff;
   --color-error: #ffb4ab;
   --color-inverse-primary: #ba005c;
   --color-on-tertiary-fixed-variant: #004f54;
-  --color-background: #121318;
+  --color-background: #13111a;
   --color-on-secondary-container: #d0a6ff;
   --color-on-secondary: #470083;
   --color-on-primary-fixed-variant: #8f0045;
   --color-on-secondary-fixed-variant: #6600b7;
   --color-on-primary-fixed: #3f001b;
-  --color-surface-bright: #38393f;
+  --color-surface-bright: #3d374e;
   --color-on-tertiary-fixed: #002022;
   --color-tertiary-fixed-dim: #00dbe9;
-  --color-surface-variant: #34343a;
+  --color-surface-variant: #373247;
   --color-inverse-surface: #e3e1e9;
   --color-secondary-fixed: #efdbff;
   --color-error-container: #93000a;
   --color-on-primary: #65002f;
   --color-secondary-container: #6807ba;
-  --color-surface-container: #1e1f25;
-  --color-surface-container-highest: #34343a;
-  --color-outline-variant: #5a4046;
+  --color-surface-container: #221e2d;
+  --color-surface-container-highest: #373247;
+  --color-outline-variant: #5c4556;
   --color-secondary: #dbb8ff;
   --color-on-tertiary: #00363a;
   --color-primary: #ffb1c5;
-  --color-surface-container-lowest: #0d0e13;
+  --color-surface-container-lowest: #0e0c14;
   --color-on-primary-container: #ffffff;
   --color-tertiary-container: #00838c;
-  --color-surface-container-low: #1a1b21;
+  --color-surface-container-low: #1b1824;
   --color-primary-fixed: #ffd9e1;
-  --color-surface-container-high: #292a2f;
-  --color-on-background: #e3e1e9;
-  --color-on-surface: #e3e1e9;
+  --color-surface-container-high: #2c2839;
+  --color-on-background: #ece9f3;
+  --color-on-surface: #ece9f3;
   --color-primary-fixed-dim: #ffb1c5;
   --color-tertiary: #00dbe9;
 
@@ -136,10 +136,38 @@
   --text-headline-sm--font-weight: 600;
 }
 
-/* estilos base: fondo oscuro y texto claro en toda la app */
+/* estilos base: fondo oscuro, texto claro y detalles de marca en toda la app */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--color-background);
+  background-image:
+    radial-gradient(circle at 12% 0%, rgba(225, 29, 116, 0.09), transparent 42%),
+    radial-gradient(circle at 92% 8%, rgba(104, 7, 186, 0.14), transparent 46%);
+  background-attachment: fixed;
   color: var(--color-on-surface);
+}
+
+/* anillo de foco visible y coherente con la marca (teclado) */
+:focus-visible {
+  outline: 2px solid var(--color-primary-container);
+  outline-offset: 2px;
+}
+
+/* barra de scroll discreta (la clase se usaba pero no estaba definida) */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(216, 196, 210, 0.25) transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(216, 196, 210, 0.25);
+  border-radius: 9999px;
 }
 
 /* los iconos de Material Symbols (se usan con <span class="material-symbols-outlined">) */
@@ -160,22 +188,4 @@ body {
 .brand-btn-glow:hover {
   box-shadow: 0 0 25px rgba(225, 29, 116, 0.45);
   transform: translateY(-1px);
-}
-/* barra de scroll delgada para listas (notificaciones, feedback, menú lateral) */
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-outline-variant) transparent;
-}
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--color-outline-variant);
-  border-radius: 9999px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--color-outline);
 }
