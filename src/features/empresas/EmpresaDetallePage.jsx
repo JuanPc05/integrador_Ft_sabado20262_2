@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Badge, Button, Icon } from '@/components/common';
 import InfoCard from '@/features/empresas/components/empresa/InfoCard';
 import ContactCard from '@/features/empresas/components/empresa/ContactCard';
@@ -18,7 +18,8 @@ function SectionTitle({ icon, children }) {
 
 export function EmpresaDetallePage() {
   const { id: paramId } = useParams();
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { user, refrescarSesion, logout } = useAuth();
   const [empresa, setEmpresa] = useState(null);
 
   const empresaId = empresa?.idRegistro || paramId || user?.idEmpresa || user?.empresaId || user?.empresa?.id;
@@ -91,16 +92,37 @@ export function EmpresaDetallePage() {
       if (empresaId) {
         const actualizada = await empresaService.actualizar(empresaId, payload);
         setEmpresa(mapearDatosEmpresa(actualizada));
+        refrescarSesion?.(actualizada);
         setSuccessMessage('La información de la empresa se actualizó correctamente.');
         setIsEditing(false);
       } else {
         const nuevaEmpresa = await empresaService.crear(payload);
         setEmpresa(mapearDatosEmpresa(nuevaEmpresa));
-        setSuccessMessage('La empresa fue creada y registrada exitosamente.');
+        refrescarSesion?.(nuevaEmpresa);
+        setSuccessMessage(
+          'Empresa registrada con éxito. Por favor inicia sesión nuevamente para aplicar los cambios.'
+        );
         setIsEditing(false);
+
+        setTimeout(() => {
+          logout?.();
+          navigate('/login');
+        }, 1800);
       }
     } catch (err) {
-      setError(err.message || 'Ocurrió un error al guardar los datos de la empresa.');
+      let mensajeError = 'Ocurrió un error al guardar los datos de la empresa.';
+      if (typeof err?.response?.data === 'string' && err.response.data.trim()) {
+        mensajeError = err.response.data;
+      } else {
+        mensajeError =
+          err?.response?.data?.message ||
+          err?.response?.data?.mensaje ||
+          err?.response?.data?.error ||
+          err?.message ||
+          mensajeError;
+      }
+      setError(mensajeError);
+      throw err;
     } finally {
       setIsSaving(false);
     }

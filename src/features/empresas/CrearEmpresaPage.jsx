@@ -2,11 +2,6 @@ import { Badge } from '@/components/common';
 import EmpresaForm from '@/features/empresas/components/empresa/EmpresaForm';
 
 export function CrearEmpresaPage() {
-  const handleSave = (values) => {
-    // TODO: conectar con la API para guardar la empresa
-    console.log('Empresa:', values);
-  };
-
   return (
     <div className="w-full max-w-2xl mx-auto bg-surface-container-low rounded-2xl border border-white/10 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.85)] p-6 sm:p-10">
       <div className="mb-8 text-left flex flex-col items-start">
@@ -21,7 +16,7 @@ export function CrearEmpresaPage() {
         </p>
       </div>
 
-      <EmpresaForm onSubmit={handleSave} />
+      <EmpresaForm />
     </div>
   );
 }

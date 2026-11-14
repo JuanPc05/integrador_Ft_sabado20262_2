@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button, Icon } from '@/components/common';
+import { useAuth } from '@/features/auth/useAuth';
+import { springApi } from '@/services/apiClient';
 import FormField from './FormField';
 
 const SECTORS = [
@@ -16,6 +18,9 @@ const SECTORS = [
 ];
 
 function EmpresaForm({ initialData = null, onSubmit, isSubmitting = false }) {
+  const navigate = useNavigate();
+  const { refrescarSesion, logout } = useAuth();
+
   const [nit, setNit] = useState(initialData?.nit || '');
   const [nombre, setNombre] = useState(initialData?.nombre || initialData?.companyName || '');
   const [sector, setSector] = useState(initialData?.sector || initialData?.economicSector || '');
@@ -38,8 +43,16 @@ function EmpresaForm({ initialData = null, onSubmit, isSubmitting = false }) {
       ''
   );
 
-  const handleSubmit = (e) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setSuccessMessage('');
+    setLoading(true);
+
     const payload = {
       nit: nit.trim(),
       nombre: nombre.trim(),
@@ -48,11 +61,67 @@ function EmpresaForm({ initialData = null, onSubmit, isSubmitting = false }) {
       correo: correo.trim(),
       telefono: telefono.trim(),
     };
-    onSubmit?.(payload);
+
+    try {
+      if (onSubmit) {
+        await onSubmit(payload);
+      } else {
+        const response = await springApi.post('/api/empresas', payload);
+        const nuevaEmpresa = response.data;
+
+        refrescarSesion?.(nuevaEmpresa);
+        setSuccessMessage(
+          'Empresa registrada con éxito. Por favor inicia sesión nuevamente para aplicar los cambios.'
+        );
+
+        setTimeout(() => {
+          logout?.();
+          navigate('/login');
+        }, 1800);
+      }
+    } catch (err) {
+      let mensajeError = 'Error desconocido al guardar la empresa.';
+      if (typeof err?.response?.data === 'string' && err.response.data.trim()) {
+        mensajeError = err.response.data;
+      } else {
+        mensajeError =
+          err?.response?.data?.message ||
+          err?.response?.data?.mensaje ||
+          err?.response?.data?.error ||
+          err?.message ||
+          mensajeError;
+      }
+      setError(mensajeError);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const guardando = isSubmitting || loading;
 
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
+      {error && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="p-4 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-200 text-body-sm font-body-sm flex items-start gap-2.5"
+        >
+          <Icon name="error" className="text-[20px] text-rose-400 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {successMessage && (
+        <div
+          role="status"
+          className="p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-body-sm font-body-sm flex items-start gap-2.5"
+        >
+          <Icon name="check_circle" className="text-[20px] text-emerald-400 shrink-0" />
+          <span>{successMessage}</span>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <FormField
           id="nit"
@@ -127,12 +196,12 @@ function EmpresaForm({ initialData = null, onSubmit, isSubmitting = false }) {
           <Button
             type="submit"
             variant="primary"
-            disabled={isSubmitting}
+            disabled={guardando}
             className="w-full sm:w-auto"
           >
             <span className="inline-flex items-center gap-2.5">
               <Icon name="check_circle" className="text-[20px]" />
-              <span>{isSubmitting ? 'Guardando...' : 'Guardar Empresa'}</span>
+              <span>{guardando ? 'Guardando...' : 'Guardar Empresa'}</span>
             </span>
           </Button>
         </div>

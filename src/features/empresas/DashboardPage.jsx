@@ -1,5 +1,6 @@
 // src/features/empresas/DashboardPage.jsx
 import { useState, useEffect, useMemo } from 'react';
+import { useAuth } from '@/features/auth/useAuth';
 import { springApi } from '@/services/apiClient';
 import { KpiCard } from '@/features/empresas/components/dashboard/KpiCard';
 import { ChallengeTable } from '@/features/empresas/components/dashboard/ChallengeTable';
@@ -8,6 +9,7 @@ import { SupportBanner } from '@/features/empresas/components/dashboard/SupportB
 import { NextSessionCard } from '@/features/empresas/components/dashboard/NextSessionCard';
 
 export const DashboardMainPage = () => {
+  const { user } = useAuth();
   const [retos, setRetos] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +24,7 @@ export const DashboardMainPage = () => {
 
         // Soporta arreglo directo [{ id, nombre, ... }] (y fallback defensivo si algún día se pagina)
         const payload = response.data;
-        const listaRetos = Array.isArray(payload)
+        const data = Array.isArray(payload)
           ? payload
           : Array.isArray(payload?.content)
             ? payload.content
@@ -30,9 +32,28 @@ export const DashboardMainPage = () => {
               ? payload.data
               : [];
 
+        console.log('Usuario:', user);
+        console.log('Retos crudos:', data);
+
+        const esAdmin = user?.rol === 'ADMIN_UNIVERSIDAD';
+        const retosFiltrados = data.filter((reto) => {
+          if (esAdmin) return true;
+
+          // Extraer el ID de la empresa del reto (soporta objeto anidado o campo plano)
+          const retoEmpresaId =
+            reto.empresa?.id || reto.empresaId || reto.idEmpresa;
+          // Extraer el ID de la empresa del usuario
+          const usuarioEmpresaId =
+            user?.empresa?.id || user?.idEmpresa || user?.empresaId;
+
+          // Si el perfil aún no tiene empresa asociada en sesión, mostrar los retos disponibles
+          if (!usuarioEmpresaId) return true;
+
+          return String(retoEmpresaId) === String(usuarioEmpresaId);
+        });
+
         if (isMounted) {
-          // Renderiza siempre el listado completo de retos recibidos desde Spring Boot
-          setRetos(listaRetos);
+          setRetos(retosFiltrados);
         }
       } catch (err) {
         console.error('[Dashboard] Error al obtener retos desde /api/retos:', err);
@@ -51,7 +72,7 @@ export const DashboardMainPage = () => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [user]);
 
   // Cálculos derivados memorizados con useMemo a partir de todos los estados del enum EstadoReto
   const retosActivos = useMemo(
