@@ -16,12 +16,13 @@ export const RetoLayout = ({ children, showHelpLink = true }) => {
       <header className="w-full bg-surface/80 backdrop-blur-md sticky top-0 z-50 border-b border-surface-variant/40 shadow-lg shadow-black/40">
         <div className="flex justify-between items-center w-full px-6 md:px-12 max-w-7xl mx-auto h-20">
           
-          {/* Brand Logo Left */}
-          <a
-            href="#"
+          {/* Brand Logo Left: lleva al dashboard */}
+          <Link
+            to="/dashboard"
+            aria-label="Ir al Dashboard"
             className="flex items-center gap-3.5 group transition-transform active:scale-95 duration-150"
           >
-            <div className="relative w-11 h-11 rounded-full p-0.5 bg-gradient-to-tr from-primary-container to-secondary flex items-center justify-center shadow-lg shadow-primary-container/20 group-hover:shadow-primary-container/40 transition-shadow">
+            <div className="relative w-11 h-11 rounded-full p-0.5 bg-linear-to-tr from-primary-container to-secondary flex items-center justify-center shadow-lg shadow-primary-container/20 group-hover:shadow-primary-container/40 transition-shadow">
               <img
                 alt="CESDE Isotipo"
                 className="w-full h-full object-cover rounded-full"
@@ -36,7 +37,7 @@ export const RetoLayout = ({ children, showHelpLink = true }) => {
                 Ecosistema de Innovación
               </span>
             </div>
-          </a>
+          </Link>
 
           {/* Trailing Action Cluster Right */}
           <div className="flex items-center gap-6">
@@ -81,7 +82,7 @@ export const RetoLayout = ({ children, showHelpLink = true }) => {
             {/* Brand identity Column */}
             <div className="flex flex-col gap-4 md:col-span-1">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full p-0.5 bg-gradient-to-tr from-primary-container to-secondary flex items-center justify-center">
+                <div className="w-9 h-9 rounded-full p-0.5 bg-linear-to-tr from-primary-container to-secondary flex items-center justify-center">
                   <img
                     alt="CESDE Isotipo"
                     className="w-full h-full object-cover rounded-full"

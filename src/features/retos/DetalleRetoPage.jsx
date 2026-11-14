@@ -2,10 +2,12 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { retoService } from '@/features/retos/reto.service';
+import { useAuth } from '@/features/auth/useAuth';
 import {
   ChallengeTabs,
   TeamSubmissionsList,
   ChallengeSidebar,
+  CriteriaCard,
 } from '@/features/retos/detalleReto';
 
 function formatearFecha(fechaStr) {
@@ -35,7 +37,8 @@ export function DetalleRetoPage() {
   const [reto, setReto] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [mostrarDescripcion, setMostrarDescripcion] = useState(false);
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('postulaciones');
 
   useEffect(() => {
     if (!id) return;
@@ -109,6 +112,10 @@ export function DetalleRetoPage() {
   const nombrePrioridad =
     reto.prioridad?.nombre || reto.nombrePrioridad || 'Prioridad Estándar';
   const estadoActual = reto.estadoActual || reto.estado || 'RADICADO';
+  // Los estudiantes solo consultan el reto: editar queda para admin y empresa
+  const puedeEditar =
+    user?.rol === 'ADMIN_UNIVERSIDAD' || user?.rol === 'REPRESENTANTE_EMPRESA';
+  const fechaCreacionFormateada = reto.fechaCreacion ? formatearFecha(reto.fechaCreacion) : null;
 
   const fechaInicioFormateada = formatearFecha(reto.fechaInicio);
   const fechaLimiteRaw = reto.fechaFin || reto.fechaLimiteRpta;
@@ -151,7 +158,7 @@ export function DetalleRetoPage() {
       {/* 2. Cabecera principal del reto (Tarjeta Superior) */}
       <section className="rounded-3xl bg-surface-container-low border border-white/10 p-6 md:p-8 backdrop-blur-xl relative overflow-hidden shadow-[0_16px_36px_-8px_rgba(0,0,0,0.8),0_0_24px_-2px_rgba(225,29,116,0.12)]">
         {/* Brillo decorativo esquina superior */}
-        <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-gradient-to-br from-primary-container/20 to-secondary-container/20 blur-2xl pointer-events-none"></div>
+        <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-linear-to-br from-primary-container/20 to-secondary-container/20 blur-2xl pointer-events-none"></div>
 
         <div className="flex flex-col lg:flex-row justify-between lg:items-start gap-6 relative z-10">
           <div className="flex flex-col gap-4 flex-1">
@@ -245,37 +252,26 @@ export function DetalleRetoPage() {
 
           {/* Botones de Acción Rápida */}
           <div className="flex items-center gap-3 pt-2 lg:pt-0 shrink-0">
+            {puedeEditar && (
+              <button
+                type="button"
+                onClick={() => navigate(`/dashboard/retos/nuevo?edit=${reto.id}`)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-surface-container-high border border-white/10 text-on-surface hover:text-white hover:border-primary/40 hover:bg-surface-variant transition-all duration-200 text-label-md font-label-md shadow-sm cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">edit</span>
+                <span>Actualizar</span>
+              </button>
+            )}
             <button
               type="button"
-              onClick={() => navigate(`/dashboard/retos/nuevo?edit=${reto.id}`)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-surface-container-high border border-white/10 text-on-surface hover:text-white hover:border-primary/40 hover:bg-surface-variant transition-all duration-200 text-label-md font-label-md shadow-sm cursor-pointer"
+              onClick={() => setActiveTab('descripcion')}
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-linear-to-r from-primary-container to-secondary-container text-white font-bold hover:shadow-[0_0_24px_rgba(225,29,116,0.45)] hover:scale-[1.02] active:scale-95 transition-all duration-200 text-label-md font-label-md shadow-md cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[18px]">
-                edit
-              </span>
-              <span>Actualizar</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setMostrarDescripcion((prev) => !prev)}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary-container to-secondary-container text-white font-bold hover:shadow-[0_0_24px_rgba(225,29,116,0.45)] hover:scale-[1.02] active:scale-95 transition-all duration-200 text-label-md font-label-md shadow-md cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[20px]">
-                {mostrarDescripcion ? 'expand_less' : 'add_task'}
-              </span>
-              <span>+ Nueva Evaluación</span>
+              <span className="material-symbols-outlined text-[20px]">description</span>
+              <span>Ver descripción</span>
             </button>
           </div>
         </div>
-
-        {/* Contenedor Condicional de Descripción */}
-        {mostrarDescripcion && (
-          <div className="mt-4 p-4 bg-surface-container rounded-lg border border-white/5 relative z-10">
-            <p className="text-body-md font-body-md text-on-surface leading-relaxed whitespace-pre-line">
-              {reto.descripcion}
-            </p>
-          </div>
-        )}
       </section>
 
       {/* 3. Resumen de KPIs del reto (Tarjetas Inferiores) */}
@@ -336,7 +332,7 @@ export function DetalleRetoPage() {
           {/* Barra de progreso */}
           <div className="mt-3 w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
             <div
-              className="bg-gradient-to-r from-emerald-500 to-tertiary h-1.5 rounded-full"
+              className="bg-linear-to-r from-emerald-500 to-tertiary h-1.5 rounded-full"
               style={{ width: `${porcentajeEntregables}%` }}
             ></div>
           </div>
@@ -404,13 +400,83 @@ export function DetalleRetoPage() {
       </section>
 
       {/* 4. Navegación por pestañas del reto */}
-      <ChallengeTabs challenge={reto} />
+      <ChallengeTabs activeTab={activeTab} onChange={setActiveTab} />
 
-      {/* 5. Contenedor de dos columnas: Contenido Principal (8 cols) + Sidebar (4 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <TeamSubmissionsList challengeId={id} />
-        <ChallengeSidebar challenge={reto} />
-      </div>
+      {/* 5. Contenido según la pestaña activa */}
+      {activeTab === 'postulaciones' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <TeamSubmissionsList challengeId={id} />
+          <ChallengeSidebar challenge={reto} />
+        </div>
+      )}
+
+      {activeTab === 'descripcion' && (
+        <section className="rounded-3xl bg-surface-container-low border border-white/10 p-6 md:p-8 flex flex-col gap-6">
+          <div>
+            <h2 className="text-headline-sm font-headline-sm text-white font-bold mb-3">
+              Descripción del reto
+            </h2>
+            <p className="text-body-md font-body-md text-on-surface leading-relaxed whitespace-pre-line">
+              {reto.descripcion || 'Este reto aún no tiene una descripción registrada.'}
+            </p>
+          </div>
+
+          <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-body-sm font-body-sm">
+            {[
+              ['Empresa', nombreEmpresa],
+              ['Categoría', nombreCategoria],
+              ['Prioridad', nombrePrioridad],
+              ['Estado', estadoActual],
+              ['Fecha de inicio', fechaInicioFormateada],
+              ['Fecha límite', fechaLimiteFormateada],
+            ].map(([etiqueta, valor]) => (
+              <div
+                key={etiqueta}
+                className="rounded-xl bg-surface-container/60 border border-white/5 px-4 py-3"
+              >
+                <dt className="text-caption font-caption text-outline">{etiqueta}</dt>
+                <dd className="text-on-surface font-semibold mt-0.5">{valor}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
+
+      {activeTab === 'rubrica' && (
+        <div className="max-w-2xl">
+          <CriteriaCard />
+        </div>
+      )}
+
+      {activeTab === 'historial' && (
+        <section className="rounded-3xl bg-surface-container-low border border-white/10 p-6 md:p-8">
+          <h2 className="text-headline-sm font-headline-sm text-white font-bold mb-5">
+            Historial de cambios
+          </h2>
+          <ol className="flex flex-col gap-5 border-l border-white/10 pl-6">
+            {[
+              fechaCreacionFormateada && {
+                icono: 'add_circle',
+                titulo: 'Reto registrado',
+                detalle: fechaCreacionFormateada,
+              },
+              { icono: 'flag', titulo: 'Estado actual', detalle: estadoActual },
+              { icono: 'calendar_today', titulo: 'Fecha de inicio', detalle: fechaInicioFormateada },
+              { icono: 'event_busy', titulo: 'Fecha límite', detalle: fechaLimiteFormateada },
+            ]
+              .filter(Boolean)
+              .map((item) => (
+                <li key={item.titulo} className="relative">
+                  <span className="absolute -left-9.25 top-0 w-6 h-6 rounded-full bg-surface-container-high border border-white/10 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[14px] text-primary">{item.icono}</span>
+                  </span>
+                  <p className="text-label-md font-label-md text-white font-semibold">{item.titulo}</p>
+                  <p className="text-body-sm font-body-sm text-on-surface-variant">{item.detalle}</p>
+                </li>
+              ))}
+          </ol>
+        </section>
+      )}
     </div>
   );
 }
