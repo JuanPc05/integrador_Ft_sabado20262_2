@@ -21,12 +21,12 @@ export const Header = () => {
 
   const displayName =
     user?.rol === 'REPRESENTANTE_EMPRESA'
-      ? user?.empresa?.nombre || user?.nombreCompleto || user?.nombre_completo || 'Empresa Aliada'
+      ? user?.nombreCompleto || user?.nombre_completo || 'Representante'
       : 'CESDE';
 
   const displaySubtitle =
     user?.rol === 'REPRESENTANTE_EMPRESA' && !isCesdeRole
-      ? 'Alianza CESDE'
+      ? user?.nombreEmpresa || 'Empresa Aliada'
       : 'Ecosistema de Innovación';
 
   return (

@@ -4,10 +4,11 @@ import { pythonApi } from '@/services/apiClient';
 
 /**
  * Custom Hook para consumir los KPIs analíticos desde el microservicio FastAPI (Puerto 8000).
- * Desacopla la lógica de red y estado (loading, error, data) de la vista de React.
+ * Desacopla la lógica de red y estado (loading, error, data, fuenteDatos) de la vista de React.
  */
 export const useMetrics = () => {
   const [data, setData] = useState([]);
+  const [fuenteDatos, setFuenteDatos] = useState('spring_boot_live');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -16,10 +17,15 @@ export const useMetrics = () => {
       setLoading(true);
       setError(null);
 
-      // Petición GET al microservicio de Python usando la instancia sin interceptor JWT
-      const response = await pythonApi.get('/v1/metrics/top-companies');
+      // Petición GET sin caché estática para traer siempre los datos frescos desde MySQL vía FastAPI
+      const response = await pythonApi.get('/v1/metrics/top-companies', {
+        params: { _t: Date.now() },
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      });
 
-      // TopCompaniesResponse devuelve la lista de empresas dentro de `response.data.data`
       const metricsArray = Array.isArray(response.data?.data)
         ? response.data.data
         : Array.isArray(response.data)
@@ -27,6 +33,7 @@ export const useMetrics = () => {
           : [];
 
       setData(metricsArray);
+      setFuenteDatos(response.data?.fuente_datos || 'spring_boot_live');
     } catch (err) {
       const errorMessage =
         err.response?.data?.detail ||
@@ -44,6 +51,7 @@ export const useMetrics = () => {
 
   return {
     data,
+    fuenteDatos,
     loading,
     error,
     refetch: fetchTopCompanies,

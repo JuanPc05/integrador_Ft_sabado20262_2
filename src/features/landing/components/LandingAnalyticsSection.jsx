@@ -20,6 +20,7 @@ const PIE_COLORS = ['#E11D74', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444'];
 
 export const LandingAnalyticsSection = () => {
   const [analytics, setAnalytics] = useState({
+    fuente_datos: 'spring_boot_live',
     total_retos: 0,
     total_empresas: 0,
     tasa_exito_global: 0,
@@ -34,10 +35,17 @@ export const LandingAnalyticsSection = () => {
       setLoading(true);
       setError('');
 
-      // Petición asíncrona al microservicio de Python (Puerto 8000) usando la instancia `pythonApi`
-      const { data } = await pythonApi.get('/api/analytics/resumen');
+      // Petición asíncrona sin caché al microservicio de Python (Puerto 8000)
+      const { data } = await pythonApi.get('/api/analytics/resumen', {
+        params: { _t: Date.now() },
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      });
 
       setAnalytics({
+        fuente_datos: data?.fuente_datos || 'spring_boot_live',
         total_retos: data?.total_retos ?? 0,
         total_empresas: data?.total_empresas ?? 0,
         tasa_exito_global: data?.tasa_exito_global ?? 0,
@@ -64,12 +72,21 @@ export const LandingAnalyticsSection = () => {
       {/* Encabezado de la sección */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10">
         <div>
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-container/15 border border-primary-container/30 text-primary text-caption font-caption uppercase font-bold tracking-widest mb-3">
-            <span className="material-symbols-outlined text-[15px]">
-              analytics
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-container/15 border border-primary-container/30 text-primary text-caption font-caption uppercase font-bold tracking-widest">
+              <span className="material-symbols-outlined text-[15px]">
+                analytics
+              </span>
+              Analítica en Tiempo Real · FastAPI + Pandas
             </span>
-            Analítica en Tiempo Real · FastAPI + Pandas
-          </span>
+
+            {analytics.fuente_datos === 'synthetic_simulation' && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-caption font-caption uppercase font-bold tracking-widest">
+                <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping" />
+                Modo Simulación
+              </span>
+            )}
+          </div>
           <h2 className="text-headline-xl font-headline-xl text-on-surface font-bold">
             Impacto del Ecosistema CESDE Conecta
           </h2>

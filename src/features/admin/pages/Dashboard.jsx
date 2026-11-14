@@ -13,7 +13,7 @@ import {
 import { useMetrics } from '@/hooks/useMetrics';
 
 export const Dashboard = () => {
-  const { data, loading, error, refetch } = useMetrics();
+  const { data, fuenteDatos, loading, error, refetch } = useMetrics();
 
   // Cálculo rápido de totales para las tarjetas resumen superiores
   const totalRetosGlobal = data.reduce(
@@ -37,11 +37,20 @@ export const Dashboard = () => {
       {/* Encabezado del Dashboard Analítico */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-3">
-            <span className="material-symbols-outlined text-[16px]">
-              monitoring
-            </span>
-            <span>Misión 2 · Analytics API (FastAPI + Pandas)</span>
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 text-xs font-semibold uppercase tracking-wider">
+              <span className="material-symbols-outlined text-[16px]">
+                monitoring
+              </span>
+              <span>Misión 2 · Analytics API (FastAPI + Pandas)</span>
+            </div>
+
+            {fuenteDatos === 'synthetic_simulation' && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-bold uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping" />
+                Modo Simulación
+              </span>
+            )}
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight">
             Dashboard Analítico de Innovación

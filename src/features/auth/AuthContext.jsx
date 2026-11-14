@@ -57,6 +57,27 @@ export function AuthProvider({ children }) {
   }, []);
 
   /**
+   * Actualiza los datos de la empresa vinculada al usuario en el contexto y localStorage,
+   * o sincroniza el estado del usuario actual desde localStorage.
+   */
+  const refrescarSesion = useCallback((nuevaEmpresa = null) => {
+    setUser((prevUser) => {
+      if (!prevUser) return null;
+      const updatedUser = nuevaEmpresa?.id
+        ? {
+            ...prevUser,
+            idEmpresa: nuevaEmpresa.id,
+            empresaId: nuevaEmpresa.id,
+            nombreEmpresa: nuevaEmpresa.nombre || prevUser.nombreEmpresa || null,
+            empresa: nuevaEmpresa,
+          }
+        : prevUser;
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updatedUser));
+      return updatedUser;
+    });
+  }, []);
+
+  /**
    * Limpia las credenciales persistidas y reinicia el estado global de autenticación.
    */
   const logout = useCallback(() => {
@@ -72,9 +93,10 @@ export function AuthProvider({ children }) {
       isAuthenticated,
       loading,
       loginContext,
+      refrescarSesion,
       logout,
     }),
-    [user, isAuthenticated, loading, loginContext, logout]
+    [user, isAuthenticated, loading, loginContext, refrescarSesion, logout]
   );
 
   return (
