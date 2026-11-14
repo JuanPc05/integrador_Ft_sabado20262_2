@@ -11,7 +11,7 @@ const TESTIMONIALS_DATA = [
     role: 'Estudiante Líder • Equipo NeuralSync',
     comment:
       'Trabajar sobre datos e infraestructura reales nos brindó una experiencia profesional inigualable antes de graduarnos.',
-    image: '/images/testimonio-estudiante.jpg',
+    image: '/images/cesde_1.jpeg',
     imageAlt: 'Estudiante de CESDE sonriendo frente a la sede de la institución',
   },
 ];
@@ -42,12 +42,12 @@ export const TestimonialsSection = () => {
                   loading="lazy"
                   className="w-full h-full object-cover object-[30%_25%]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-surface-container-low via-surface-container-low/10 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-surface-container-low via-surface-container-low/10 to-transparent" />
               </div>
             ) : (
-              <div className="relative h-72 md:h-80 flex items-center justify-center bg-gradient-to-br from-secondary-container/40 via-surface-container to-primary-container/20">
+              <div className="relative h-72 md:h-80 flex items-center justify-center bg-linear-to-br from-secondary-container/40 via-surface-container to-primary-container/20">
                 <span className="material-symbols-outlined text-primary/80 text-[96px]">{t.icon}</span>
-                <div className="absolute inset-0 bg-gradient-to-t from-surface-container-low via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-surface-container-low via-transparent to-transparent" />
               </div>
             )}
 
